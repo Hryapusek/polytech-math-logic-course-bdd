@@ -10,6 +10,8 @@ set(SOURCE_LIST
   src/BDDHelper.cpp
   src/BDDFormulaBuilder.hpp
   src/BDDFormulaBuilder.cpp
+  src/Conditions.hpp
+  src/Conditions.cpp
   )
 
 add_executable(${target}
