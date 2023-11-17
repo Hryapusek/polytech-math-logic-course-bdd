@@ -76,15 +76,15 @@ TEST(BDDHelper, basic)
   auto o = std::vector(vars.rbegin() + 6, vars.rend());
   BDDHelper h(vars);
   EXPECT_EQ(h.getProp(Property::ANIMAL), p[0] & p[1] & not p[2]);
-  EXPECT_EQ(h.getHouseVal(House::FIRST, H_Color::BLUE),
+  EXPECT_EQ(h.getHouseAndVal(House::FIRST, H_Color::BLUE),
     not o[0] & not o[1] & not o[2] &
     not p[0] & not p[1] & not p[2] &
     not v[0] & v[1] & not v[2]);
-  EXPECT_EQ(h.getHouseVal(House::SECOND, Treat::BOUNTY),
+  EXPECT_EQ(h.getHouseAndVal(House::SECOND, Treat::BOUNTY),
     o[0] & not o[1] & not o[2] &
     not p[0] & not p[1] & p[2] &
     v[0] & v[1] & not v[2]);
-  EXPECT_EQ(h.getPropVal(Treat::BOUNTY),
+  EXPECT_EQ(h.getPropAndVal(Treat::BOUNTY),
     not p[0] & not p[1] & p[2] &
     v[0] & v[1] & not v[2]);
 }

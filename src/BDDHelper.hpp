@@ -2,9 +2,9 @@
 #define BDD_HELPER_HPP
 
 #include <vector>
-#include "bdd.h"
 #include <type_traits>
 #include <cassert>
+#include "bdd.h"
 
 namespace bddHelper
 {
@@ -168,14 +168,14 @@ namespace bddHelper
      * @return Combination of p0 p1 p2 v0 v1 v2 with respect to given value
      */
     template< class V_t >
-    bdd getPropVal(V_t value);
+    bdd getPropAndVal(V_t value);
 
     /**
      * @return Combination of o0 o1 o2 p0 p1 p2 v0 v1 v2 that describes
      * given house with property and value
      */
     template< class V_t >
-    bdd getHouseVal(House obj, V_t value);
+    bdd getHouseAndVal(House obj, V_t value);
 
   private:
     std::vector< bdd > o_;
@@ -193,7 +193,7 @@ namespace bddHelper
   }
 
   template <class V_t>
-  inline bdd BDDHelper::getPropVal(V_t value)
+  inline bdd BDDHelper::getPropAndVal(V_t value)
   {
     static_assert(traits_::IsValueType_v< V_t >, "Value must be one of properties types");
     Property prop = traits_::PropertyFromValueEnum_v< V_t >;
@@ -202,7 +202,7 @@ namespace bddHelper
   }
 
   template < class V_t >
-  inline bdd BDDHelper::getHouseVal(House obj, V_t value)
+  inline bdd BDDHelper::getHouseAndVal(House obj, V_t value)
   {
     static_assert(traits_::IsValueType_v< V_t >, "Value must be one of properties types");
     Property prop = traits_::PropertyFromValueEnum_v< V_t >;
