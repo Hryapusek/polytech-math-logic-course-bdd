@@ -1,2 +1,4 @@
 build/
 tmp.txt
+CMakeCache.txt
+CMakeFiles

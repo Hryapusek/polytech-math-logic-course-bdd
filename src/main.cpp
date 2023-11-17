@@ -6,9 +6,10 @@
 
 int main()
 {
+  using namespace bddHelper;
   bdd_init(1000, 100);
   bdd_setvarnum(9);
-  std::vector<bdd> vars;
+  std::vector< bdd > vars;
   for (auto i : std::views::iota(0, 9))
     vars.push_back(bdd_ithvar(i));
   BDDHelper h(vars);
