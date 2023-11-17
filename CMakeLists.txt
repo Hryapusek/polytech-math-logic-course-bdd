@@ -7,7 +7,11 @@ option(BUILD_TEST OFF)
 set(SOURCE_LIST 
   include/bdd.h
   src/BDDHelper.hpp
-  src/BDDHelper.cpp)
+  src/BDDHelper.cpp
+  src/BDDFormulaBuilder.hpp
+  src/BDDFormulaBuilder.cpp
+  )
+
 add_executable(${target}
   src/main.cpp
   ${SOURCE_LIST}
