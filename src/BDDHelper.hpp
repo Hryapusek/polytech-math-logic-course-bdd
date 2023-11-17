@@ -154,7 +154,6 @@ namespace bddHelper
 
     /**
      * @tparam V_t - must be one of H_Color Nation Plant Animal Treat enum type
-     * @param value
      * @return Combination of v0 v1 v2 with respect to given value
      * @note For example:
      * @note H_Color::RED return !v0 & !v1 & !v2
@@ -164,6 +163,10 @@ namespace bddHelper
     template< class V_t >
     bdd getVal(V_t value);
 
+    /**
+     * @tparam V_t - must be one of H_Color Nation Plant Animal Treat enum type
+     * @return Combination of p0 p1 p2 v0 v1 v2 with respect to given value
+     */
     template< class V_t >
     bdd getPropVal(V_t value);
 
