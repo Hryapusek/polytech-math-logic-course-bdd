@@ -45,14 +45,14 @@ namespace
     builder.addCondition(formulaToAdd);
   }
 
-  void addFirstCondition(bddHelper::BDDHelper &h, BDDFormulaBuilder &builder);
-  void addSecondCondition(bddHelper::BDDHelper &h, BDDFormulaBuilder &builder);
-  void addThirdCondition(bddHelper::BDDHelper &h, BDDFormulaBuilder &builder);
-  void addFourthCondition(bddHelper::BDDHelper &h, BDDFormulaBuilder &builder);
-  void addFifthCondition(bddHelper::BDDHelper &h, BDDFormulaBuilder &builder);
-  void addSixthCondition(bddHelper::BDDHelper &h, BDDFormulaBuilder &builder);
-  void addSeventhCondition(bddHelper::BDDHelper &h, BDDFormulaBuilder &builder);
-  void addEighthCondition(bddHelper::BDDHelper &h, BDDFormulaBuilder &builder);
+  void addFirstCondition(BDDHelper &h, BDDFormulaBuilder &builder);
+  void addSecondCondition(BDDHelper &h, BDDFormulaBuilder &builder);
+  void addThirdCondition(BDDHelper &h, BDDFormulaBuilder &builder);
+  void addFourthCondition(BDDHelper &h, BDDFormulaBuilder &builder);
+  void addFifthCondition(BDDHelper &h, BDDFormulaBuilder &builder);
+  void addSixthCondition(BDDHelper &h, BDDFormulaBuilder &builder);
+  void addSeventhCondition(BDDHelper &h, BDDFormulaBuilder &builder);
+  void addEighthCondition(BDDHelper &h, BDDFormulaBuilder &builder);
   void addNinethCondition(BDDHelper &h, BDDFormulaBuilder &builder);
   void addTenthCondition(BDDHelper &h, BDDFormulaBuilder &builder);
   void addEleventhCondition(BDDHelper &h, BDDFormulaBuilder &builder);
@@ -155,7 +155,7 @@ namespace
 
 namespace conditions
 {
-  void addConditions(bddHelper::BDDHelper &h, BDDFormulaBuilder &builder)
+  void addConditions(BDDHelper &h, BDDFormulaBuilder &builder)
   {
     addFirstCondition(h, builder);
     addSecondCondition(h, builder);
