@@ -8,7 +8,7 @@
 
 namespace bddHelper
 {
-  enum class Object
+  enum class House
   {
     FIRST,
     SECOND,
@@ -24,7 +24,7 @@ namespace bddHelper
     ANIMAL,
     TREAT
   };
-  enum class House
+  enum class H_Color
   {
     RED,
     GREEN,
@@ -69,7 +69,7 @@ namespace bddHelper
   {
     template
     < class V_t, class = std::enable_if_t<
-      std::is_same_v< V_t, House > ||
+      std::is_same_v< V_t, H_Color > ||
       std::is_same_v< V_t, Nation > ||
       std::is_same_v< V_t, Plant > ||
       std::is_same_v< V_t, Animal > ||
@@ -88,7 +88,7 @@ namespace bddHelper
     };
 
     template < class V_t >
-    struct PropertyFromValueEnum< V_t, std::enable_if_t< std::is_same_v< V_t, House > > >
+    struct PropertyFromValueEnum< V_t, std::enable_if_t< std::is_same_v< V_t, H_Color > > >
     {
       static constexpr Property value = Property::HOUSE;
     };
@@ -137,11 +137,11 @@ namespace bddHelper
     /**
      * @return Combination of o0 o1 o2 with respect to given value
      * @note For example:
-     * @note Object::FIRST return !o0 & !o1 & !o2
-     * @note Object::THIRD return !o0 & o1 & 1o2
+     * @note House::FIRST return !o0 & !o1 & !o2
+     * @note House::THIRD return !o0 & o1 & 1o2
      * @note etc...
      */
-    bdd getObj(Object obj);
+    bdd getHouse(House obj);
 
     /**
      * @return Combination of p0 p1 p2 with respect to given value
@@ -153,11 +153,11 @@ namespace bddHelper
     bdd getProp(Property prop);
 
     /**
-     * @tparam V_t - must be one of House Nation Plant Animal Treat enum type
+     * @tparam V_t - must be one of H_Color Nation Plant Animal Treat enum type
      * @param value
      * @return Combination of v0 v1 v2 with respect to given value
      * @note For example:
-     * @note House::RED return !v0 & !v1 & !v2
+     * @note H_Color::RED return !v0 & !v1 & !v2
      * @note Nation::BELARUS return !v0 & !v1 & v2
      * @note etc...
      */
@@ -169,10 +169,10 @@ namespace bddHelper
 
     /**
      * @return Combination of o0 o1 o2 p0 p1 p2 v0 v1 v2 that describes
-     * given object with property and value
+     * given house with property and value
      */
     template< class V_t >
-    bdd getObjVal(Object obj, V_t value);
+    bdd getHouseVal(House obj, V_t value);
 
   private:
     std::vector< bdd > o_;
@@ -199,12 +199,12 @@ namespace bddHelper
   }
 
   template < class V_t >
-  inline bdd BDDHelper::getObjVal(Object obj, V_t value)
+  inline bdd BDDHelper::getHouseVal(House obj, V_t value)
   {
     static_assert(traits_::IsValueType_v< V_t >, "Value must be one of properties types");
     Property prop = traits_::PropertyFromValueEnum_v< V_t >;
     auto val = static_cast< int >(value);
-    return getObj(obj) & getProp(prop) & getVal(value);
+    return getHouse(obj) & getProp(prop) & getVal(value);
   }
 
 }
