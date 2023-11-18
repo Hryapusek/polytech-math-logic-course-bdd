@@ -1,53 +1,32 @@
 #include "BDDHelper.hpp"
+#include <expected>
+#include <utility>
 
 namespace bddHelper
 {
-  bdd BDDHelper::fromNum(int num, std::vector< bdd > &var)
+  BDDHelper::BDDHelper(std::vector< bdd > objects, std::vector< bdd > props, std::vector< bdd > values) :
+    o_(std::move(objects)),
+    p_(std::move(props)),
+    v_(std::move(values))
   {
-    switch (num)
-    {
-      case 0:
-        return not var[2] & not var[1] & not var[0];
-
-      case 1:
-        return not var[2] & not var[1] & var[0];
-
-      case 2:
-        return not var[2] & var[1] & not var[0];
-
-      case 3:
-        return not var[2] & var[1] & var[0];
-
-      case 4:
-        return var[2] & not var[1] & not var[0];
-
-      default:
-        assert(("Value must be between 0 and 4", false));
-    }
+    assert(("Incorrect size found",
+            o_.size() == nObjs and
+            p_.size() == nObjs * nProps and
+            v_.size() == nObjs * nProps * nVals));
   }
 
-  BDDHelper::BDDHelper(std::vector< bdd > vars)
+  bdd BDDHelper::getObj_(House obj)
   {
-    assert(("Size of vars must be 9.", vars.size() == 9));
-    v_ = std::vector(vars.rbegin(), vars.rbegin() + 3);
-    p_ = std::vector(vars.rbegin() + 3, vars.rbegin() + 6);
-    o_ = std::vector(vars.rbegin() + 6, vars.rend());
-    assert(("Size of all the vectors v p and o must be 3",
-            v_.size() == p_.size() and
-            v_.size() == o_.size() and
-            v_.size() == 3));
+    auto val = toNum(obj);
+    return o_[val];
   }
 
-  bdd BDDHelper::getHouse(House obj)
+  bdd BDDHelper::getProp_(House obj, Property prop)
   {
-    auto val = static_cast< int >(obj);
-    return fromNum(val, o_);
-  }
-
-  bdd BDDHelper::getProp(Property prop)
-  {
-    auto val = static_cast< int >(prop);
-    return fromNum(val, p_);
+    auto objNum = toNum(obj);
+    auto propNum = toNum(prop);
+    auto index = objNum * nObjs + propNum;
+    return p_[index];
   }
 }
 
@@ -56,37 +35,33 @@ namespace bddHelper
 
 #include <gtest/gtest.h>
 #include <ranges>
+#include "TestFixture.hpp"
 
-TEST(BDDHelper, basic)
+bddHelper::BDDHelper::BDDHelper()
+{}
+
+TEST_F(VarsSetupFixture, basic)
 {
   using namespace bddHelper;
-  std::vector< bdd > vars(9);
-  for (auto i : std::views::iota(0, 9))
-  {
-    auto varsIndex = i / 3 * 3 + (2 - i % 3);
-    EXPECT_TRUE(i != 0 or varsIndex == 2);
-    EXPECT_TRUE(i != 1 or varsIndex == 1);
-    EXPECT_TRUE(i != 2 or varsIndex == 0);
-    EXPECT_TRUE(i != 3 or varsIndex == 5);
-    EXPECT_TRUE(i != 4 or varsIndex == 4);
-    vars[i] = bdd_ithvar(varsIndex);
-  }
-  auto v = std::vector(vars.rbegin(), vars.rbegin() + 3);
-  auto p = std::vector(vars.rbegin() + 3, vars.rbegin() + 6);
-  auto o = std::vector(vars.rbegin() + 6, vars.rend());
-  BDDHelper h(vars);
-  EXPECT_EQ(h.getProp(Property::ANIMAL), p[0] & p[1] & not p[2]);
-  EXPECT_EQ(h.getHouseAndVal(House::FIRST, H_Color::BLUE),
-    not o[0] & not o[1] & not o[2] &
-    not p[0] & not p[1] & not p[2] &
-    not v[0] & v[1] & not v[2]);
-  EXPECT_EQ(h.getHouseAndVal(House::SECOND, Treat::BOUNTY),
-    o[0] & not o[1] & not o[2] &
-    not p[0] & not p[1] & p[2] &
-    v[0] & v[1] & not v[2]);
-  EXPECT_EQ(h.getPropAndVal(Treat::BOUNTY),
-    not p[0] & not p[1] & p[2] &
-    v[0] & v[1] & not v[2]);
+  EXPECT_EQ(nTotalVars, 5*5*5+5*5+5);
+  EXPECT_EQ(vars.size(), nTotalVars);
+  EXPECT_EQ(objs.size(), 5);
+  EXPECT_EQ(props.size(), 5*5);
+  EXPECT_EQ(vals.size(), 5*5*5);
+  EXPECT_EQ(objs[4], vars[4]);
+  EXPECT_EQ(props[0], vars[5]);
+  EXPECT_EQ(props[1], vars[6]);
+  EXPECT_EQ(vals[0], vars[5*5 + 5]);
+  EXPECT_EQ(h.getProp_(House::FIRST, Property::ANIMAL), objs[0] & props[3]);
+  EXPECT_EQ(h.getHouseAndVal(House::THIRD, H_Color::BLUE),
+    objs[2] & props[2*5] & vals[2*5*5 + 2*5 + 2]);
+  // EXPECT_EQ(h.getHouseAndVal(House::SECOND, Treat::BOUNTY),
+  //   o[0] & not o[1] & not o[2] &
+  //   not p[0] & not p[1] & p[2] &
+  //   v[0] & v[1] & not v[2]);
+  // EXPECT_EQ(h.getPropAndVal(Treat::BOUNTY),
+  //   not p[0] & not p[1] & p[2] &
+  //   v[0] & v[1] & not v[2]);
 }
 
 #endif

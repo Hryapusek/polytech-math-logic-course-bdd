@@ -4,7 +4,19 @@
 #include <vector>
 #include <type_traits>
 #include <cassert>
+#include <any>
+#include <expected>
+#include <utility>
 #include "bdd.h"
+
+#ifdef GTEST_TESTING
+
+#include <gtest/gtest.h>
+
+class VarsSetupFixture_basic_Test;
+class VarsSetupFixture;
+
+#endif
 
 namespace bddHelper
 {
@@ -64,6 +76,9 @@ namespace bddHelper
     BOUNTY,
     KITKAT
   };
+
+  template< class V_t >
+  int toNum(V_t value);
 
   namespace traits_
   {
@@ -127,12 +142,39 @@ namespace bddHelper
   class BDDHelper
   {
   public:
+    static constexpr int nObjs = 5;
+    static constexpr int nProps = 5;
+    static constexpr int nVals = 5;
+    static constexpr int nObjsVars = nObjs;
+    static constexpr int nPropsVars = nObjs * nProps;
+    static constexpr int nValuesVars = nObjs * nProps * nVals;
+    static constexpr int nTotalVars = nObjsVars + nPropsVars + nValuesVars;
+
     /**
      * @brief Construct a new BDDHelper object.
      *
-     * @param vars contains o2 o1 o0 p2 p1 p0 v2 v1 v0
+     * @param vars contains o0 o1 ... o4 p00 p01 ... p04 p10 p11 ...
+     * p44 v000 v001 ... v004 v010 v011 ... v044 v100 ... v444
      */
-    BDDHelper(std::vector< bdd > vars);
+    BDDHelper(std::vector< bdd > objects, std::vector< bdd > props, std::vector< bdd > values);
+
+    /**
+     * @return Combination of o0 o1 o2 p0 p1 p2 v0 v1 v2 that describes
+     * given house with property and value
+     */
+    template< class V_t >
+    bdd getHouseAndVal(House obj, V_t value);
+
+  private:
+  #ifdef GTEST_TESTING
+    friend class ::VarsSetupFixture_basic_Test;
+    friend class ::VarsSetupFixture;
+  #endif
+    std::vector< bdd > o_;
+    std::vector< bdd > p_;
+    std::vector< bdd > v_;
+
+    BDDHelper();
 
     /**
      * @return Combination of o0 o1 o2 with respect to given value
@@ -141,7 +183,7 @@ namespace bddHelper
      * @note House::THIRD return !o0 & o1 & 1o2
      * @note etc...
      */
-    bdd getHouse(House obj);
+    bdd getObj_(House obj);
 
     /**
      * @return Combination of p0 p1 p2 with respect to given value
@@ -150,7 +192,7 @@ namespace bddHelper
      * @note Property::PLANT return !p0 & p1 & !p2
      * @note etc...
      */
-    bdd getProp(Property prop);
+    bdd getProp_(House obj, Property prop);
 
     /**
      * @tparam V_t - must be one of H_Color Nation Plant Animal Treat enum type
@@ -161,45 +203,34 @@ namespace bddHelper
      * @note etc...
      */
     template< class V_t >
-    bdd getVal(V_t value);
+    bdd getVal_(House obj, V_t value);
 
     /**
      * @tparam V_t - must be one of H_Color Nation Plant Animal Treat enum type
      * @return Combination of p0 p1 p2 v0 v1 v2 with respect to given value
      */
-    template< class V_t >
-    bdd getPropAndVal(V_t value);
-
-    /**
-     * @return Combination of o0 o1 o2 p0 p1 p2 v0 v1 v2 that describes
-     * given house with property and value
-     */
-    template< class V_t >
-    bdd getHouseAndVal(House obj, V_t value);
-
-  private:
-    std::vector< bdd > o_;
-    std::vector< bdd > p_;
-    std::vector< bdd > v_;
-    bdd fromNum(int num, std::vector< bdd > &var);
+    // template< class V_t >
+    // bdd getPropAndVal(V_t value);
   };
 
   template < class V_t >
-  inline bdd BDDHelper::getVal(V_t value)
+  inline bdd BDDHelper::getVal_(House obj, V_t value)
   {
     static_assert(traits_::IsValueType_v< V_t >, "Value must be one of properties type");
-    auto val = static_cast< int >(value);
-    return fromNum(val, v_);
+    auto objNum = toNum(obj);
+    auto propNum = static_cast< int >(traits_::PropertyFromValueEnum_v< V_t >);
+    auto valNum = toNum(value);
+    return v_[objNum * nObjs * nProps + propNum * nProps + valNum];
   }
 
-  template <class V_t>
-  inline bdd BDDHelper::getPropAndVal(V_t value)
-  {
-    static_assert(traits_::IsValueType_v< V_t >, "Value must be one of properties types");
-    Property prop = traits_::PropertyFromValueEnum_v< V_t >;
-    auto val = static_cast< int >(value);
-    return getProp(prop) & getVal(value);
-  }
+  // template < class V_t >
+  // inline bdd BDDHelper::getPropAndVal(V_t value)
+  // {
+  //   static_assert(traits_::IsValueType_v< V_t >, "Value must be one of properties types");
+  //   Property prop = traits_::PropertyFromValueEnum_v< V_t >;
+  //   auto val = static_cast< int >(value);
+  //   return getProp(prop) & getVal(value);
+  // }
 
   template < class V_t >
   inline bdd BDDHelper::getHouseAndVal(House obj, V_t value)
@@ -207,8 +238,16 @@ namespace bddHelper
     static_assert(traits_::IsValueType_v< V_t >, "Value must be one of properties types");
     Property prop = traits_::PropertyFromValueEnum_v< V_t >;
     auto val = static_cast< int >(value);
-    return getHouse(obj) & getProp(prop) & getVal(value);
+    return getObj_(obj) & getProp_(obj, prop) & getVal_(obj, value);
   }
 
+  template < class Enum_Val_t >
+  int toNum(Enum_Val_t value)
+  {
+    static_assert(std::is_enum_v< Enum_Val_t >, "Value must be enum");
+    int num = static_cast< int >(value);
+    assert(("Invalid enum value found", num >= 0 and num <= 4));
+    return num;
+  }
 }
 #endif

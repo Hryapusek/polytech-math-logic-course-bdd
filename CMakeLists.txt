@@ -3,7 +3,7 @@ find_library(buddyLib buddy HINTS ./lib REQUIRED)
 project(bdd_example LANGUAGES CXX C)
 set(target bdd_main)
 set(CMAKE_CXX_STANDARD 23)
-option(BUILD_TEST OFF)
+option(BUILD_TEST ON)
 set(SOURCE_LIST 
   include/bdd.h
   src/BDDHelper.hpp
@@ -26,6 +26,7 @@ if (BUILD_TEST)
   set(test_target test_target)
   add_executable(${test_target}
     src/mainTEST.cpp
+    src/TestFixture.hpp
     ${SOURCE_LIST}
   )
   set_target_properties(${test_target} PROPERTIES CXX_STANDARD 23)
