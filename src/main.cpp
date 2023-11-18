@@ -11,7 +11,7 @@ using namespace bddHelper;
 
 int main()
 {
-  bdd_init(100000000, 1000000);
+  bdd_init(10000000, 10000000);
   bdd_setvarnum(BDDHelper::nTotalVars);
   constexpr int nObjs = bddHelper::BDDHelper::nObjs;
   constexpr int nProps = bddHelper::BDDHelper::nProps;
@@ -36,10 +36,7 @@ int main()
   objs = std::vector< bdd > (vars.begin(), vars.begin() + nObjs);
   props = std::vector< bdd > (vars.begin() + nObjsVars, vars.begin() + nObjsVars + nPropsVars);
   vals = std::vector< bdd > (vars.begin() + nObjsVars + nPropsVars, vars.end());
-
   BDDHelper h(objs, props, vals);
-
-
   BDDFormulaBuilder builder;
   conditions::addConditions(h, builder);
   std::cout << bdd_satcount(builder.result()) << '\n';
