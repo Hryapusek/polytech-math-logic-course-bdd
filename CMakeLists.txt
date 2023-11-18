@@ -18,6 +18,7 @@ add_executable(${target}
   src/main.cpp
   ${SOURCE_LIST}
 )
+target_compile_options(${target} PUBLIC -O3)
 set_target_properties(${target} PROPERTIES CXX_STANDARD 23)
 target_link_libraries(${target} PUBLIC ${buddyLib})
 target_include_directories(${target} PUBLIC include)
@@ -27,6 +28,7 @@ if (BUILD_TEST)
   add_executable(${test_target}
     src/mainTEST.cpp
     src/TestFixture.hpp
+    src/TestFixture.cpp
     ${SOURCE_LIST}
   )
   set_target_properties(${test_target} PROPERTIES CXX_STANDARD 23)

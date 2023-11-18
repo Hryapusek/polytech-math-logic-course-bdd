@@ -34,7 +34,7 @@ namespace
   {
     static_assert(traits_::IsValueType_v< V_t1 > && traits_::IsValueType_v< V_t2 >, "Value must be one of properties type");
     auto resultFormulaToAdd = bdd_false();
-    for (auto i : std::views::iota(0, HOUSE_COUNT - 1))
+    for (auto i : std::views::iota(0, HOUSE_COUNT))
     {
       auto houseNum = static_cast< House >(i);
       if (i != 0)
@@ -42,7 +42,7 @@ namespace
         auto prevHouseNum = static_cast< House >(i - 1);
         resultFormulaToAdd |= (h.getHouseAndVal(houseNum, value1) & h.getHouseAndVal(prevHouseNum, value2));
       }
-      if (i != HOUSE_COUNT - 1)
+      if (i != HOUSE_COUNT-1)
       {
         auto nextHouseNum = static_cast< House >(i + 1);
         resultFormulaToAdd |= (h.getHouseAndVal(houseNum, value1) & h.getHouseAndVal(nextHouseNum, value2));
@@ -116,6 +116,8 @@ namespace
   void addNinethCondition(BDDHelper &h, BDDFormulaBuilder &builder)
   {
     builder.addCondition(h.getHouseAndVal(House::FIFTH, Nation::HISPANE));
+    builder.addCondition(h.getHouseAndVal(House::SECOND, Treat::MARS));
+    builder.addCondition(h.getHouseAndVal(House::FOURTH, Nation::BELORUS));
   }
 
   void addTenthCondition(BDDHelper &h, BDDFormulaBuilder &builder)
@@ -146,77 +148,38 @@ namespace
 
 #ifdef GTEST_TESTING
 #include <gtest/gtest.h>
+#include <ranges>
+#include "TestFixture.hpp"
 
-TEST(Conditions, LoopCondition)
+
+TEST_F(VarsSetupFixture, Conditions_LoopCondition)
 {
   using namespace bddHelper;
-  const auto nObjs = BDDHelper::nObjs;
-  const auto nProps = BDDHelper::nProps;
-  const auto nVals = BDDHelper::nVals;
-  const auto nObjsVars = BDDHelper::nObjsVars;
-  const auto nPropsVars = BDDHelper::nPropsVars;
-  const auto nValuesVars = BDDHelper::nValuesVars;
-  const auto nTotalVars = BDDHelper::nTotalVars;
-  std::vector< bdd > vars(nTotalVars);
-  std::generate(std::begin(vars), std::end(vars),
-    []() {
-    static int i = 0;
-    auto var = bdd_ithvar(i);
-    return bdd_ithvar(i++);
-  });
-  std::vector< bdd > objs(vars.begin(), vars.begin() + nObjs);
-  std::vector< bdd > props(vars.begin() + nObjsVars, vars.begin() + nObjsVars + nPropsVars);
-  std::vector< bdd > vals(vars.begin() + nObjsVars + nPropsVars, vars.end());
-
-  BDDHelper h(objs, props, vals);
-  {
-    BDDFormulaBuilder build;
-    addLoopCondition(std::make_tuple(H_Color::RED), h, build);
-    auto expectedResult = h.getHouseAndVal(House::FIRST, H_Color::RED);
-    expectedResult |= h.getHouseAndVal(House::SECOND, H_Color::RED);
-    expectedResult |= h.getHouseAndVal(House::THIRD, H_Color::RED);
-    expectedResult |= h.getHouseAndVal(House::FOURTH, H_Color::RED);
-    expectedResult |= h.getHouseAndVal(House::FIFTH, H_Color::RED);
-    EXPECT_EQ(build.result(), expectedResult);
-  }
+  BDDFormulaBuilder build;
+  addLoopCondition(std::make_tuple(H_Color::RED), h, build);
+  auto expectedResult = h.getHouseAndVal(House::FIRST, H_Color::RED);
+  expectedResult |= h.getHouseAndVal(House::SECOND, H_Color::RED);
+  expectedResult |= h.getHouseAndVal(House::THIRD, H_Color::RED);
+  expectedResult |= h.getHouseAndVal(House::FOURTH, H_Color::RED);
+  expectedResult |= h.getHouseAndVal(House::FIFTH, H_Color::RED);
+  EXPECT_EQ(build.result(), expectedResult);
 }
 
-TEST(Conditions, NeighborsCondition)
-{
-  GTEST_SKIP();
-  using namespace bddHelper;
-  const auto nObjs = BDDHelper::nObjs;
-  const auto nProps = BDDHelper::nProps;
-  const auto nVals = BDDHelper::nVals;
-  const auto nObjsVars = BDDHelper::nObjsVars;
-  const auto nPropsVars = BDDHelper::nPropsVars;
-  const auto nValuesVars = BDDHelper::nValuesVars;
-  const auto nTotalVars = BDDHelper::nTotalVars;
-  std::vector< bdd > vars(nTotalVars);
-  std::generate(std::begin(vars), std::end(vars),
-    []() {
-    static int i = 0;
-    auto var = bdd_ithvar(i);
-    return bdd_ithvar(i++);
-  });
-  std::vector< bdd > objs(vars.begin(), vars.begin() + nObjs);
-  std::vector< bdd > props(vars.begin() + nObjsVars, vars.begin() + nObjsVars + nPropsVars);
-  std::vector< bdd > vals(vars.begin() + nObjsVars + nPropsVars, vars.end());
 
-  BDDHelper h(objs, props, vals);
-  {
-    BDDFormulaBuilder build;
-    addNeighbors(H_Color::RED, H_Color::GREEN, h, build);
-    auto expectedResult = h.getHouseAndVal(House::FIRST, H_Color::RED) & h.getHouseAndVal(House::SECOND, H_Color::GREEN);
-    expectedResult |= h.getHouseAndVal(House::SECOND, H_Color::RED) & h.getHouseAndVal(House::FIRST, H_Color::GREEN);
-    expectedResult |= h.getHouseAndVal(House::SECOND, H_Color::RED) & h.getHouseAndVal(House::THIRD, H_Color::GREEN);
-    expectedResult |= h.getHouseAndVal(House::THIRD, H_Color::RED) & h.getHouseAndVal(House::SECOND, H_Color::GREEN);
-    expectedResult |= h.getHouseAndVal(House::THIRD, H_Color::RED) & h.getHouseAndVal(House::FOURTH, H_Color::GREEN);
-    expectedResult |= h.getHouseAndVal(House::FOURTH, H_Color::RED) & h.getHouseAndVal(House::THIRD, H_Color::GREEN);
-    expectedResult |= h.getHouseAndVal(House::FOURTH, H_Color::RED) & h.getHouseAndVal(House::FIFTH, H_Color::GREEN);
-    expectedResult |= h.getHouseAndVal(House::FIFTH, H_Color::RED) & h.getHouseAndVal(House::FOURTH, H_Color::GREEN);
-    EXPECT_EQ(build.result(), expectedResult);
-  }
+TEST_F(VarsSetupFixture, Conditions_NeighborsCondition)
+{
+  using namespace bddHelper;
+  BDDFormulaBuilder build;
+  addNeighbors(H_Color::RED, H_Color::GREEN, h, build);
+  auto expectedResult = h.getHouseAndVal(House::FIRST, H_Color::RED) & h.getHouseAndVal(House::SECOND, H_Color::GREEN);
+  expectedResult |= h.getHouseAndVal(House::SECOND, H_Color::RED) & h.getHouseAndVal(House::FIRST, H_Color::GREEN);
+  expectedResult |= h.getHouseAndVal(House::SECOND, H_Color::RED) & h.getHouseAndVal(House::THIRD, H_Color::GREEN);
+  expectedResult |= h.getHouseAndVal(House::THIRD, H_Color::RED) & h.getHouseAndVal(House::SECOND, H_Color::GREEN);
+  expectedResult |= h.getHouseAndVal(House::THIRD, H_Color::RED) & h.getHouseAndVal(House::FOURTH, H_Color::GREEN);
+  expectedResult |= h.getHouseAndVal(House::FOURTH, H_Color::RED) & h.getHouseAndVal(House::THIRD, H_Color::GREEN);
+  expectedResult |= h.getHouseAndVal(House::FOURTH, H_Color::RED) & h.getHouseAndVal(House::FIFTH, H_Color::GREEN);
+  expectedResult |= h.getHouseAndVal(House::FIFTH, H_Color::RED) & h.getHouseAndVal(House::FOURTH, H_Color::GREEN);
+  EXPECT_EQ(build.result(), expectedResult);
 }
 
 #endif

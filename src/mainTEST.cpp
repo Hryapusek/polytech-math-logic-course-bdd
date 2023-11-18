@@ -10,9 +10,8 @@ using namespace bddHelper;
 
 int main()
 {
-  bdd_init(1000, 100);
+  bdd_init(100000, 10000);
   bdd_setvarnum(BDDHelper::nTotalVars);
-  BDDFormulaBuilder builder;
   ::testing::InitGoogleTest();
   auto res = RUN_ALL_TESTS();
   bdd_done();

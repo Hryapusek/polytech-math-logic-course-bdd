@@ -30,7 +30,6 @@ namespace bddHelper
   }
 }
 
-
 #ifdef GTEST_TESTING
 
 #include <gtest/gtest.h>
@@ -40,7 +39,7 @@ namespace bddHelper
 bddHelper::BDDHelper::BDDHelper()
 {}
 
-TEST_F(VarsSetupFixture, basic)
+TEST_F(VarsSetupFixture, BDDHelperbasic)
 {
   using namespace bddHelper;
   EXPECT_EQ(nTotalVars, 5*5*5+5*5+5);
@@ -52,16 +51,11 @@ TEST_F(VarsSetupFixture, basic)
   EXPECT_EQ(props[0], vars[5]);
   EXPECT_EQ(props[1], vars[6]);
   EXPECT_EQ(vals[0], vars[5*5 + 5]);
-  EXPECT_EQ(h.getProp_(House::FIRST, Property::ANIMAL), objs[0] & props[3]);
+  EXPECT_EQ(h.getProp_(House::FIRST, Property::ANIMAL), props[3]);
   EXPECT_EQ(h.getHouseAndVal(House::THIRD, H_Color::BLUE),
-    objs[2] & props[2*5] & vals[2*5*5 + 2*5 + 2]);
-  // EXPECT_EQ(h.getHouseAndVal(House::SECOND, Treat::BOUNTY),
-  //   o[0] & not o[1] & not o[2] &
-  //   not p[0] & not p[1] & p[2] &
-  //   v[0] & v[1] & not v[2]);
-  // EXPECT_EQ(h.getPropAndVal(Treat::BOUNTY),
-  //   not p[0] & not p[1] & p[2] &
-  //   v[0] & v[1] & not v[2]);
+    objs[2] & props[2*5] & vals[2*5*5 + 2]);
+  EXPECT_EQ(h.getHouseAndVal(House::SECOND, Treat::BOUNTY),
+    objs[1] & props[1*5+4] & vals[1*5*5 + 4*5 + 3]);
 }
 
 #endif

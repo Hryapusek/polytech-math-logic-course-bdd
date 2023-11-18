@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <ranges>
+#include <algorithm>
 #include "bdd.h"
 #include "BDDHelper.hpp"
 #include "BDDFormulaBuilder.hpp"
@@ -8,30 +9,40 @@
 
 using namespace bddHelper;
 
-/**
- * @return std::vector< bdd > with [ o2 o1 o0 p2 p1 p0 v2 v1 v0 ]
- * @note bdd_ithvar contains [o0 o1 o2 p0 p1 p2 v0 v1 v2]
- */
-std::vector< bdd > createVariables()
-{
-  bdd_setvarnum(9);
-  std::vector< bdd > vars(9);
-  for (auto i : std::views::iota(0, 9))
-  {
-    auto varsIndex = i / 3 * 3 + (2 - i % 3);
-    vars[i] = bdd_ithvar(varsIndex);
-  }
-  return vars;
-}
-
 int main()
 {
-  bdd_init(1000, 100);
-  std::vector< bdd > vars = createVariables();
-  BDDHelper h(vars);
+  bdd_init(100000000, 1000000);
+  bdd_setvarnum(BDDHelper::nTotalVars);
+  constexpr int nObjs = bddHelper::BDDHelper::nObjs;
+  constexpr int nProps = bddHelper::BDDHelper::nProps;
+  constexpr int nVals = bddHelper::BDDHelper::nVals;
+  constexpr int nObjsVars = bddHelper::BDDHelper::nObjsVars;
+  constexpr int nPropsVars = bddHelper::BDDHelper::nPropsVars;
+  constexpr int nValuesVars = bddHelper::BDDHelper::nValuesVars;
+  constexpr int nTotalVars = bddHelper::BDDHelper::nTotalVars;
+  std::vector< bdd > vars;
+  std::vector< bdd > objs;
+  std::vector< bdd > props;
+  std::vector< bdd > vals;
+  using namespace bddHelper;
+  vars = std::vector< bdd > (nTotalVars);
+  {
+    int i = 0;
+    std::generate(std::begin(vars), std::end(vars),
+      [&i]() {
+      return bdd_ithvar(i++);
+    });
+  }
+  objs = std::vector< bdd > (vars.begin(), vars.begin() + nObjs);
+  props = std::vector< bdd > (vars.begin() + nObjsVars, vars.begin() + nObjsVars + nPropsVars);
+  vals = std::vector< bdd > (vars.begin() + nObjsVars + nPropsVars, vars.end());
+
+  BDDHelper h(objs, props, vals);
+
+
   BDDFormulaBuilder builder;
   conditions::addConditions(h, builder);
-  std::cout << bddset << builder.result() << '\n';
+  std::cout << bdd_satcount(builder.result()) << '\n';
   bdd_done();
   return 0;
 }

@@ -13,7 +13,7 @@
 
 #include <gtest/gtest.h>
 
-class VarsSetupFixture_basic_Test;
+class VarsSetupFixture_BDDHelperbasic_Test;
 class VarsSetupFixture;
 
 #endif
@@ -167,7 +167,7 @@ namespace bddHelper
 
   private:
   #ifdef GTEST_TESTING
-    friend class ::VarsSetupFixture_basic_Test;
+    friend class ::VarsSetupFixture_BDDHelperbasic_Test;
     friend class ::VarsSetupFixture;
   #endif
     std::vector< bdd > o_;
@@ -204,13 +204,6 @@ namespace bddHelper
      */
     template< class V_t >
     bdd getVal_(House obj, V_t value);
-
-    /**
-     * @tparam V_t - must be one of H_Color Nation Plant Animal Treat enum type
-     * @return Combination of p0 p1 p2 v0 v1 v2 with respect to given value
-     */
-    // template< class V_t >
-    // bdd getPropAndVal(V_t value);
   };
 
   template < class V_t >
@@ -222,15 +215,6 @@ namespace bddHelper
     auto valNum = toNum(value);
     return v_[objNum * nObjs * nProps + propNum * nProps + valNum];
   }
-
-  // template < class V_t >
-  // inline bdd BDDHelper::getPropAndVal(V_t value)
-  // {
-  //   static_assert(traits_::IsValueType_v< V_t >, "Value must be one of properties types");
-  //   Property prop = traits_::PropertyFromValueEnum_v< V_t >;
-  //   auto val = static_cast< int >(value);
-  //   return getProp(prop) & getVal(value);
-  // }
 
   template < class V_t >
   inline bdd BDDHelper::getHouseAndVal(House obj, V_t value)
