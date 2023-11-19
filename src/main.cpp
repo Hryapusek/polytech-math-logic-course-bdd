@@ -53,6 +53,17 @@ void printProp(Property prop, int valNum)
 
 void printObjects()
 {
+  if (varset.empty())
+  {
+    std::cout << "No suitable object property value combination was found.\n";
+    return;
+  }
+  if (varset.size() != nTotalVars)
+  {
+    std::cout << "Array varset must contain 144 values.\
+                  Otherwise there is an error in calculations.\n";
+    return;
+  }
   for (auto objNum : std::views::iota(0, nObjs))
   {
     auto obj = static_cast< Object >(objNum);
@@ -103,8 +114,9 @@ int main()
   BDDHelper h(v);
   BDDFormulaBuilder builder;
   conditions::addConditions(h, builder);
-  std::cout << "Bdd formula created.\n";
-  std::cout << bdd_satcount(builder.result()) << '\n';
+  std::cout << "Bdd formula created. Starting counting sets...\n";
+  std::cout << "Count of true variables values combinations: " << bdd_satcount(builder.result()) << '\n';
+  std::cout << "Objects are...\n";
   bdd_allsat(builder.result(), fun);
   printObjects();
   bdd_done();
