@@ -9,6 +9,11 @@ void BDDFormulaBuilder::addCondition(bdd formula)
   formula_ &= formula;
 }
 
+void BDDFormulaBuilder::setFormula(bdd formula)
+{
+  formula_ = formula;
+}
+
 bdd BDDFormulaBuilder::result()
 {
   return formula_;

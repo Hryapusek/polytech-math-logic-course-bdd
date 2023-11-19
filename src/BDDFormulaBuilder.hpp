@@ -8,6 +8,7 @@ class BDDFormulaBuilder
 public:
   BDDFormulaBuilder();
   void addCondition(bdd formula);
+  void setFormula(bdd formula);
   bdd result();
 
 private:
