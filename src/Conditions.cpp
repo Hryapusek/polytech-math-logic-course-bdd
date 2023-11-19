@@ -11,6 +11,90 @@ namespace
   constexpr int rightNeighbour = 2;
   constexpr bool useSkleika = false;
 
+  template < class ... V_ts >
+  void addLoopCondition(std::tuple< V_ts... > values, BDDHelper &h, BDDFormulaBuilder &builder);
+
+  template < class V_t1, class V_t2 >
+  void addNeighbors(V_t1 value1, V_t2 value2, BDDHelper &h, BDDFormulaBuilder &builder);
+
+  template < class V_t1, class V_t2 >
+  void addLeftNeighbors(V_t1 value1, V_t2 value2, BDDHelper &h, BDDFormulaBuilder &builder);
+
+  template < class V_t1, class V_t2 >
+  void addRightNeighbors(V_t1 value1, V_t2 value2, BDDHelper &h, BDDFormulaBuilder &builder);
+
+
+  std::optional< Object > getLeftNeighbour(Object obj);
+  std::optional< Object > getRightNeighbour(Object obj);
+  std::vector< Object > getNeighbours(Object obj);
+
+  bdd notEqual(std::vector< bdd > v1, std::vector< bdd > v2);
+
+  void addFirstCondition(BDDHelper &h, BDDFormulaBuilder &builder);
+  void addSecondCondition(BDDHelper &h, BDDFormulaBuilder &builder);
+  void addThirdCondition(BDDHelper &h, BDDFormulaBuilder &builder);
+  void addFourthCondition(BDDHelper &h, BDDFormulaBuilder &builder);
+  void addUniqueCondition(BDDHelper &h, BDDFormulaBuilder &builder);
+  void addValuesUpperBoundCondition(BDDHelper &h, BDDFormulaBuilder &builder);
+
+  template < class ... V_ts >
+  void addLoopCondition(std::tuple< V_ts... > values, BDDHelper &h, BDDFormulaBuilder &builder)
+  {
+    auto resultFormulaToAdd = bdd_false();
+    for (auto i : std::views::iota(0, BDDHelper::nObjs))
+    {
+      auto house = static_cast< Object >(i);
+      auto formulas = bdd_true();
+      std::apply([&formulas, &h, &house](auto &&... args) {
+        ((formulas &= h.getObjectAndVal(house, args)), ...);
+      }, values);
+      resultFormulaToAdd |= formulas;
+    }
+    builder.addCondition(resultFormulaToAdd);
+  }
+
+  template < class V_t1, class V_t2 >
+  void addNeighbors(V_t1 value1, V_t2 value2, BDDHelper &h, BDDFormulaBuilder &builder)
+  {
+    static_assert(traits_::IsValueType_v< V_t1 > && traits_::IsValueType_v< V_t2 >, "Value must be one of properties type");
+    auto resultFormulaToAdd = bdd_false();
+    for (auto objNum : std::views::iota(0, BDDHelper::nObjs))
+    {
+      auto obj = static_cast< Object >(objNum);
+      for (auto neighbObj : getNeighbours(obj))
+        resultFormulaToAdd |= (h.getObjectAndVal(obj, value1) & h.getObjectAndVal(neighbObj, value2));
+    }
+    builder.addCondition(resultFormulaToAdd);
+  }
+
+  template < class V_t1, class V_t2 >
+  void addLeftNeighbors(V_t1 value1, V_t2 value2, BDDHelper &h, BDDFormulaBuilder &builder)
+  {
+    static_assert(traits_::IsValueType_v< V_t1 > && traits_::IsValueType_v< V_t2 >, "Value must be one of properties type");
+    auto resultFormulaToAdd = bdd_false();
+    for (auto objNum : std::views::iota(0, BDDHelper::nObjs))
+    {
+      auto obj = static_cast< Object >(objNum);
+      if (auto neighbObj = getLeftNeighbour(obj); neighbObj.has_value())
+        resultFormulaToAdd |= (h.getObjectAndVal(obj, value1) & h.getObjectAndVal(*neighbObj, value2));
+    }
+    builder.addCondition(resultFormulaToAdd);
+  }
+
+  template < class V_t1, class V_t2 >
+  void addRightNeighbors(V_t1 value1, V_t2 value2, BDDHelper &h, BDDFormulaBuilder &builder)
+  {
+    static_assert(traits_::IsValueType_v< V_t1 > && traits_::IsValueType_v< V_t2 >, "Value must be one of properties type");
+    auto resultFormulaToAdd = bdd_false();
+    for (auto objNum : std::views::iota(0, BDDHelper::nObjs))
+    {
+      auto obj = static_cast< Object >(objNum);
+      if (auto neighbObj = getRightNeighbour(obj); neighbObj.has_value())
+        resultFormulaToAdd |= (h.getObjectAndVal(obj, value1) & h.getObjectAndVal(*neighbObj, value2));
+    }
+    builder.addCondition(resultFormulaToAdd);
+  }
+
   std::optional< Object > getLeftNeighbour(Object obj)
   {
     auto objNum = toNum(obj);
@@ -45,87 +129,6 @@ namespace
     return resArr;
   }
 
-  template < class ... V_ts >
-  void addLoopCondition(std::tuple< V_ts... > values, BDDHelper &h, BDDFormulaBuilder &builder);
-
-  template < class V_t1, class V_t2 >
-  void addNeighbors(V_t1 value1, V_t2 value2, BDDHelper &h, BDDFormulaBuilder &builder);
-
-  template < class V_t1, class V_t2 >
-  void addLeftNeighbors(V_t1 value1, V_t2 value2, BDDHelper &h, BDDFormulaBuilder &builder);
-
-  template < class V_t1, class V_t2 >
-  void addRightNeighbors(V_t1 value1, V_t2 value2, BDDHelper &h, BDDFormulaBuilder &builder);
-
-  template < class ... V_ts >
-  void addLoopCondition(std::tuple< V_ts... > values, BDDHelper &h, BDDFormulaBuilder &builder)
-  {
-    auto resultFormulaToAdd = bdd_false();
-    for (auto i : std::views::iota(0, BDDHelper::nObjs))
-    {
-      auto house = static_cast< Object >(i);
-      auto formulas = bdd_true();
-      std::apply([&formulas, &h, &house](auto &&... args) {
-        ((formulas &= h.getHouseAndVal(house, args)), ...);
-      }, values);
-      resultFormulaToAdd |= formulas;
-    }
-    builder.addCondition(resultFormulaToAdd);
-  }
-
-  template < class V_t1, class V_t2 >
-  void addNeighbors(V_t1 value1, V_t2 value2, BDDHelper &h, BDDFormulaBuilder &builder)
-  {
-    static_assert(traits_::IsValueType_v< V_t1 > && traits_::IsValueType_v< V_t2 >, "Value must be one of properties type");
-    auto resultFormulaToAdd = bdd_false();
-    for (auto objNum : std::views::iota(0, BDDHelper::nObjs))
-    {
-      auto obj = static_cast< Object >(objNum);
-      for (auto neighbObj : getNeighbours(obj))
-        resultFormulaToAdd |= (h.getHouseAndVal(obj, value1) & h.getHouseAndVal(neighbObj, value2));
-    }
-    builder.addCondition(resultFormulaToAdd);
-  }
-
-  template < class V_t1, class V_t2 >
-  void addLeftNeighbors(V_t1 value1, V_t2 value2, BDDHelper &h, BDDFormulaBuilder &builder)
-  {
-    static_assert(traits_::IsValueType_v< V_t1 > && traits_::IsValueType_v< V_t2 >, "Value must be one of properties type");
-    auto resultFormulaToAdd = bdd_false();
-    for (auto objNum : std::views::iota(0, BDDHelper::nObjs))
-    {
-      auto obj = static_cast< Object >(objNum);
-      if (auto neighbObj = getLeftNeighbour(obj); neighbObj.has_value())
-        resultFormulaToAdd |= (h.getHouseAndVal(obj, value1) & h.getHouseAndVal(*neighbObj, value2));
-    }
-    builder.addCondition(resultFormulaToAdd);
-  }
-
-  template < class V_t1, class V_t2 >
-  void addRightNeighbors(V_t1 value1, V_t2 value2, BDDHelper &h, BDDFormulaBuilder &builder)
-  {
-    static_assert(traits_::IsValueType_v< V_t1 > && traits_::IsValueType_v< V_t2 >, "Value must be one of properties type");
-    auto resultFormulaToAdd = bdd_false();
-    for (auto objNum : std::views::iota(0, BDDHelper::nObjs))
-    {
-      auto obj = static_cast< Object >(objNum);
-      if (auto neighbObj = getRightNeighbour(obj); neighbObj.has_value())
-        resultFormulaToAdd |= (h.getHouseAndVal(obj, value1) & h.getHouseAndVal(*neighbObj, value2));
-    }
-    builder.addCondition(resultFormulaToAdd);
-  }
-
-  bdd notEqual(std::vector< bdd > v1, std::vector< bdd > v2);
-
-  void addFirstCondition(BDDHelper &h, BDDFormulaBuilder &builder);
-  void addSecondCondition(BDDHelper &h, BDDFormulaBuilder &builder);
-  void addThirdCondition(BDDHelper &h, BDDFormulaBuilder &builder);
-  void addFourthCondition(BDDHelper &h, BDDFormulaBuilder &builder);
-
-  void addUniqueCondition(BDDHelper &h, BDDFormulaBuilder &builder);
-
-  void addValuesUpperBoundCondition(BDDHelper &h, BDDFormulaBuilder &builder);
-
   bdd equal(bdd a, bdd b)
   {
     return (a & b) | ((not a) & (not b));
@@ -142,9 +145,7 @@ namespace
 
   void addFirstCondition(BDDHelper &h, BDDFormulaBuilder &builder)
   {
-    addLoopCondition(std::make_tuple(Nation::UKRAINE, Color::RED), h, builder);
-    addLoopCondition(std::make_tuple(Nation::UKRAINE, Animal::REPTILIES), h, builder);
-    addLoopCondition(std::make_tuple(Nation::UKRAINE, Plant::PINEAPPLE), h, builder);
+    builder.addCondition(h.getObjectAndVal(Object::FIRST, Nation::BELORUS));
   }
 
   void addUniqueCondition(BDDHelper &h, BDDFormulaBuilder &builder)
@@ -184,37 +185,32 @@ namespace
     builder.addCondition(resFormulaToAdd);
   }
 
-  // void addSecondCondition(BDDHelper &h, BDDFormulaBuilder &builder)
-  // {
-  //   addLoopCondition(std::make_tuple(Nation::BELORUS, Animal::DOG), h, builder);
-  // }
+  void addSecondCondition(BDDHelper &h, BDDFormulaBuilder &builder)
+  {
+    addLoopCondition(std::make_tuple(Nation::BELORUS, Animal::DOG), h, builder);
+  }
 
-  // void addThirdCondition(BDDHelper &h, BDDFormulaBuilder &builder)
-  // {
-  //   addLoopCondition(std::make_tuple(Color::GREEN, Plant::MALINA), h, builder);
-  // }
+  void addThirdCondition(BDDHelper &h, BDDFormulaBuilder &builder)
+  {
+    addLeftNeighbors(Color::RED, Color::GREEN, h, builder);
+  }
 
-  // void addFourthCondition(BDDHelper &h, BDDFormulaBuilder &builder)
-  // {
-  //   addLoopCondition(std::make_tuple(Nation::GRUZIN, Plant::VINOGR), h, builder);
-  // }
+  void addFourthCondition(BDDHelper &h, BDDFormulaBuilder &builder)
+  {
+    addNeighbors(Color::RED, Color::GREEN, h, builder);
+  }
 }
 
 namespace conditions
 {
   void addConditions(BDDHelper &h, BDDFormulaBuilder &builder)
   {
-    // addFirstCondition(h, builder);
+    addFirstCondition(h, builder);
+    addSecondCondition(h, builder);
+    addThirdCondition(h, builder);
+    addFourthCondition(h, builder);
     addUniqueCondition(h, builder);
     addValuesUpperBoundCondition(h, builder);
-    // TODO add distinct values condition
-    // For each property:
-    //   For each object:
-    //     For each object1:
-    //        prop(obj1) != prop(obj2)
-    // addSecondCondition(h, builder);
-    // addThirdCondition(h, builder);
-    // addFourthCondition(h, builder);
   }
 }
 
@@ -250,15 +246,15 @@ TEST_F(VarsSetupFixture, Conditions_LoopCondition)
   using namespace bddHelper;
   BDDFormulaBuilder build;
   addLoopCondition(std::make_tuple(Color::RED), h, build);
-  auto expectedResult = h.getHouseAndVal(Object::FIRST, Color::RED);
-  expectedResult |= h.getHouseAndVal(Object::SECOND, Color::RED);
-  expectedResult |= h.getHouseAndVal(Object::THIRD, Color::RED);
-  expectedResult |= h.getHouseAndVal(Object::FOURTH, Color::RED);
-  expectedResult |= h.getHouseAndVal(Object::FIFTH, Color::RED);
-  expectedResult |= h.getHouseAndVal(Object::SIXTH, Color::RED);
-  expectedResult |= h.getHouseAndVal(Object::SEVENTH, Color::RED);
-  expectedResult |= h.getHouseAndVal(Object::EIGTH, Color::RED);
-  expectedResult |= h.getHouseAndVal(Object::NINETH, Color::RED);
+  auto expectedResult = h.getObjectAndVal(Object::FIRST, Color::RED);
+  expectedResult |= h.getObjectAndVal(Object::SECOND, Color::RED);
+  expectedResult |= h.getObjectAndVal(Object::THIRD, Color::RED);
+  expectedResult |= h.getObjectAndVal(Object::FOURTH, Color::RED);
+  expectedResult |= h.getObjectAndVal(Object::FIFTH, Color::RED);
+  expectedResult |= h.getObjectAndVal(Object::SIXTH, Color::RED);
+  expectedResult |= h.getObjectAndVal(Object::SEVENTH, Color::RED);
+  expectedResult |= h.getObjectAndVal(Object::EIGTH, Color::RED);
+  expectedResult |= h.getObjectAndVal(Object::NINETH, Color::RED);
   EXPECT_EQ(build.result(), expectedResult);
 }
 
@@ -267,27 +263,27 @@ TEST_F(VarsSetupFixture, Conditions_NeighborsCondition)
   using namespace bddHelper;
   BDDFormulaBuilder build;
   addNeighbors(Color::RED, Color::GREEN, h, build);
-  auto expectedResult = h.getHouseAndVal(Object::FIRST, Color::RED) & h.getHouseAndVal(Object::THIRD, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::SECOND, Color::RED) & h.getHouseAndVal(Object::FOURTH, Color::GREEN);
+  auto expectedResult = h.getObjectAndVal(Object::FIRST, Color::RED) & h.getObjectAndVal(Object::THIRD, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::SECOND, Color::RED) & h.getObjectAndVal(Object::FOURTH, Color::GREEN);
 
-  expectedResult |= h.getHouseAndVal(Object::THIRD, Color::RED) & h.getHouseAndVal(Object::FIRST, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::THIRD, Color::RED) & h.getHouseAndVal(Object::FIFTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::THIRD, Color::RED) & h.getObjectAndVal(Object::FIRST, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::THIRD, Color::RED) & h.getObjectAndVal(Object::FIFTH, Color::GREEN);
 
-  expectedResult |= h.getHouseAndVal(Object::FOURTH, Color::RED) & h.getHouseAndVal(Object::SECOND, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::FOURTH, Color::RED) & h.getHouseAndVal(Object::SIXTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::FOURTH, Color::RED) & h.getObjectAndVal(Object::SECOND, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::FOURTH, Color::RED) & h.getObjectAndVal(Object::SIXTH, Color::GREEN);
 
-  expectedResult |= h.getHouseAndVal(Object::FIFTH, Color::RED) & h.getHouseAndVal(Object::THIRD, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::FIFTH, Color::RED) & h.getHouseAndVal(Object::SEVENTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::FIFTH, Color::RED) & h.getObjectAndVal(Object::THIRD, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::FIFTH, Color::RED) & h.getObjectAndVal(Object::SEVENTH, Color::GREEN);
 
-  expectedResult |= h.getHouseAndVal(Object::SIXTH, Color::RED) & h.getHouseAndVal(Object::FOURTH, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::SIXTH, Color::RED) & h.getHouseAndVal(Object::EIGTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::SIXTH, Color::RED) & h.getObjectAndVal(Object::FOURTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::SIXTH, Color::RED) & h.getObjectAndVal(Object::EIGTH, Color::GREEN);
 
-  expectedResult |= h.getHouseAndVal(Object::SEVENTH, Color::RED) & h.getHouseAndVal(Object::FIFTH, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::SEVENTH, Color::RED) & h.getHouseAndVal(Object::NINETH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::SEVENTH, Color::RED) & h.getObjectAndVal(Object::FIFTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::SEVENTH, Color::RED) & h.getObjectAndVal(Object::NINETH, Color::GREEN);
 
-  expectedResult |= h.getHouseAndVal(Object::EIGTH, Color::RED) & h.getHouseAndVal(Object::SIXTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::EIGTH, Color::RED) & h.getObjectAndVal(Object::SIXTH, Color::GREEN);
 
-  expectedResult |= h.getHouseAndVal(Object::NINETH, Color::RED) & h.getHouseAndVal(Object::SEVENTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::NINETH, Color::RED) & h.getObjectAndVal(Object::SEVENTH, Color::GREEN);
   EXPECT_EQ(build.result(), expectedResult);
 }
 
@@ -296,13 +292,13 @@ TEST_F(VarsSetupFixture, Conditions_LeftNeighborsCondition)
   using namespace bddHelper;
   BDDFormulaBuilder build;
   addLeftNeighbors(Color::RED, Color::GREEN, h, build);
-  auto expectedResult = h.getHouseAndVal(Object::THIRD, Color::RED) & h.getHouseAndVal(Object::FIRST, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::FOURTH, Color::RED) & h.getHouseAndVal(Object::SECOND, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::FIFTH, Color::RED) & h.getHouseAndVal(Object::THIRD, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::SIXTH, Color::RED) & h.getHouseAndVal(Object::FOURTH, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::SEVENTH, Color::RED) & h.getHouseAndVal(Object::FIFTH, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::EIGTH, Color::RED) & h.getHouseAndVal(Object::SIXTH, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::NINETH, Color::RED) & h.getHouseAndVal(Object::SEVENTH, Color::GREEN);
+  auto expectedResult = h.getObjectAndVal(Object::THIRD, Color::RED) & h.getObjectAndVal(Object::FIRST, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::FOURTH, Color::RED) & h.getObjectAndVal(Object::SECOND, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::FIFTH, Color::RED) & h.getObjectAndVal(Object::THIRD, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::SIXTH, Color::RED) & h.getObjectAndVal(Object::FOURTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::SEVENTH, Color::RED) & h.getObjectAndVal(Object::FIFTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::EIGTH, Color::RED) & h.getObjectAndVal(Object::SIXTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::NINETH, Color::RED) & h.getObjectAndVal(Object::SEVENTH, Color::GREEN);
   EXPECT_EQ(build.result(), expectedResult);
 }
 
@@ -311,13 +307,13 @@ TEST_F(VarsSetupFixture, Conditions_RightNeighborsCondition)
   using namespace bddHelper;
   BDDFormulaBuilder build;
   addRightNeighbors(Color::RED, Color::GREEN, h, build);
-  auto expectedResult = h.getHouseAndVal(Object::FIRST, Color::RED) & h.getHouseAndVal(Object::THIRD, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::SECOND, Color::RED) & h.getHouseAndVal(Object::FOURTH, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::THIRD, Color::RED) & h.getHouseAndVal(Object::FIFTH, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::FOURTH, Color::RED) & h.getHouseAndVal(Object::SIXTH, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::FIFTH, Color::RED) & h.getHouseAndVal(Object::SEVENTH, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::SIXTH, Color::RED) & h.getHouseAndVal(Object::EIGTH, Color::GREEN);
-  expectedResult |= h.getHouseAndVal(Object::SEVENTH, Color::RED) & h.getHouseAndVal(Object::NINETH, Color::GREEN);
+  auto expectedResult = h.getObjectAndVal(Object::FIRST, Color::RED) & h.getObjectAndVal(Object::THIRD, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::SECOND, Color::RED) & h.getObjectAndVal(Object::FOURTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::THIRD, Color::RED) & h.getObjectAndVal(Object::FIFTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::FOURTH, Color::RED) & h.getObjectAndVal(Object::SIXTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::FIFTH, Color::RED) & h.getObjectAndVal(Object::SEVENTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::SIXTH, Color::RED) & h.getObjectAndVal(Object::EIGTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::SEVENTH, Color::RED) & h.getObjectAndVal(Object::NINETH, Color::GREEN);
   EXPECT_EQ(build.result(), expectedResult);
 }
 

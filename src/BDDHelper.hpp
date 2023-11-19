@@ -162,7 +162,7 @@ namespace bddHelper
     BDDHelper(vect< bdd > objects, vect< vect< bdd > > props, vect< vect< vect< bdd > > > values);
 
     template< class V_t >
-    bdd getHouseAndVal(Object obj, V_t value);
+    bdd getObjectAndVal(Object obj, V_t value);
 
     std::vector< bdd > getValueVars(Object obj, Property prop);
 
@@ -200,7 +200,7 @@ namespace bddHelper
   }
 
   template < class V_t >
-  inline bdd BDDHelper::getHouseAndVal(Object obj, V_t value)
+  inline bdd BDDHelper::getObjectAndVal(Object obj, V_t value)
   {
     static_assert(traits_::IsValueType_v< V_t >, "Value must be one of properties types");
     Property prop = traits_::PropertyFromValueEnum_v< V_t >;

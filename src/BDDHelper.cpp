@@ -94,9 +94,9 @@ TEST_F(VarsSetupFixture, BDDHelperbasic)
   EXPECT_EQ(p[0][1], vars[10]);
   EXPECT_EQ(v[0][0][0], vars[9 * 4 + 9]);
   EXPECT_EQ(h.getProp_(Object::FIRST, Property::ANIMAL), p[0][3]);
-  EXPECT_EQ(h.getHouseAndVal(Object::THIRD, Color::BLUE),
+  EXPECT_EQ(h.getObjectAndVal(Object::THIRD, Color::BLUE),
     o[2] & p[2][0] & not v[2][0][0] & not v[2][0][1] & v[2][0][2] & not v[2][0][3]);
-  EXPECT_EQ(h.getHouseAndVal(Object::SECOND, Animal::BIRD),
+  EXPECT_EQ(h.getObjectAndVal(Object::SECOND, Animal::BIRD),
     o[1] & p[1][3] & not v[1][3][0] & v[1][3][1] & v[1][3][2] & not v[1][3][3]);
 }
 
