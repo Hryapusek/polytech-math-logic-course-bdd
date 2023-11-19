@@ -160,32 +160,48 @@ namespace bddHelper
     BDDHelper(vect< vect< vect< bdd > > > values);
 
     template< class V_t >
-    bdd getObjectAndVal(Object obj, V_t value);
+    bdd getObjectVal(Object obj, V_t value);
+
+    template< class V_t >
+    bdd calcObjectVal_(Object obj, V_t value);
 
     std::vector< bdd > getValueVars(Object obj, Property prop);
 
     bdd numToBin(int num, vect< bdd > vars);
 
     bdd numToBinUnsafe(int num, vect< bdd > vars);
+    
+    bdd getObjectVal(int objNum, int propNum, int valNum);
 
   private:
   #ifdef GTEST_TESTING
     friend class ::VarsSetupFixture_BDDHelperbasic_Test;
     friend class ::VarsSetupFixture;
   #endif
-    vect< vect< vect< bdd > > > v_;
+    vect< vect< vect< bdd > > > vars_;
+    vect< vect< vect< bdd > > > values_;
 
     BDDHelper();
   };
 
   template < class V_t >
-  inline bdd BDDHelper::getObjectAndVal(Object obj, V_t value)
+  inline bdd BDDHelper::getObjectVal(Object obj, V_t value)
   {
     static_assert(traits_::IsValueType_v< V_t >, "Value must be one of properties type");
     auto objNum = toNum(obj);
     auto propNum = toNum(traits_::PropertyFromValueEnum_v< V_t >);
     auto valNum = toNum(value);
-    return numToBin(valNum, v_[objNum][propNum]);
+    return values_[objNum][propNum][valNum];
+  }
+
+  template < class V_t >
+  inline bdd BDDHelper::calcObjectVal_(Object obj, V_t value)
+  {
+    static_assert(traits_::IsValueType_v< V_t >, "Value must be one of properties type");
+    auto objNum = toNum(obj);
+    auto propNum = toNum(traits_::PropertyFromValueEnum_v< V_t >);
+    auto valNum = toNum(value);
+    return numToBin(valNum, vars_[objNum][propNum]);
   }
 
   template < class Enum_Val_t >
