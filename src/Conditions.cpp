@@ -279,7 +279,15 @@ namespace
 
   void addFirstCondition(BDDHelper &h, BDDFormulaBuilder &builder)
   {
-    // builder.addCondition(h.getObjectVal(Object::FIRST, Nation::BELORUS));
+    builder.addCondition(h.getObjectVal(Object::FIRST, Nation::UKRAINE));
+    builder.addCondition(h.getObjectVal(Object::SECOND, Nation::BELORUS));
+    builder.addCondition(h.getObjectVal(Object::THIRD, Nation::GRUZIN));
+    builder.addCondition(h.getObjectVal(Object::FOURTH, Nation::HISPANE));
+    // builder.addCondition(h.getObjectVal(Object::FIFTH, Nation::CHINA));
+    builder.addCondition(h.getObjectVal(Object::SIXTH, Nation::RUSSIAN));
+    builder.addCondition(h.getObjectVal(Object::SEVENTH, Nation::CHE4ENCI));
+    // builder.addCondition(h.getObjectVal(Object::EIGTH, Nation::ARMENIAN));
+    builder.addCondition(h.getObjectVal(Object::NINETH, Nation::KAZAH));
   }
 
   void addSecondCondition(BDDHelper &h, BDDFormulaBuilder &builder)
@@ -322,7 +330,7 @@ namespace
 
   void addFourthCondition(BDDHelper &h, BDDFormulaBuilder &builder)
   {
-    addNeighbors(Color::RED, Color::GREEN, h, builder);
+    addNeighbors(Nation::CHINA, Nation::ARMENIAN, h, builder);
   }
 }
 
@@ -333,7 +341,7 @@ namespace conditions
     addFirstCondition(h, builder);
     addSecondCondition(h, builder);
     // addThirdCondition(h, builder);
-    // addFourthCondition(h, builder);
+    addFourthCondition(h, builder);
     addUniqueCondition(h, builder);
     addValuesUpperBoundCondition(h, builder);
   }
