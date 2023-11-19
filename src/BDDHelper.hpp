@@ -154,12 +154,10 @@ namespace bddHelper
     static constexpr int nProps = 4;
     static constexpr int nVals = 9;
     static constexpr int nValueBits = 4;
-    static constexpr int nObjsVars = nObjs;
-    static constexpr int nPropsVars = nObjs * nProps;
     static constexpr int nValuesVars = nObjs * nProps * nValueBits;
-    static constexpr int nTotalVars = nObjsVars + nPropsVars + nValuesVars;
+    static constexpr int nTotalVars = nValuesVars;
 
-    BDDHelper(vect< bdd > objects, vect< vect< bdd > > props, vect< vect< vect< bdd > > > values);
+    BDDHelper(vect< vect< vect< bdd > > > values);
 
     template< class V_t >
     bdd getObjectAndVal(Object obj, V_t value);
@@ -175,37 +173,19 @@ namespace bddHelper
     friend class ::VarsSetupFixture_BDDHelperbasic_Test;
     friend class ::VarsSetupFixture;
   #endif
-    vect< bdd > o_;
-    vect< vect< bdd > > p_;
     vect< vect< vect< bdd > > > v_;
 
     BDDHelper();
-
-    bdd getObj_(Object obj);
-
-    bdd getProp_(Object obj, Property prop);
-
-    template< class V_t >
-    bdd getVal_(Object obj, V_t value);
   };
 
   template < class V_t >
-  inline bdd BDDHelper::getVal_(Object obj, V_t value)
+  inline bdd BDDHelper::getObjectAndVal(Object obj, V_t value)
   {
     static_assert(traits_::IsValueType_v< V_t >, "Value must be one of properties type");
     auto objNum = toNum(obj);
     auto propNum = toNum(traits_::PropertyFromValueEnum_v< V_t >);
     auto valNum = toNum(value);
     return numToBin(valNum, v_[objNum][propNum]);
-  }
-
-  template < class V_t >
-  inline bdd BDDHelper::getObjectAndVal(Object obj, V_t value)
-  {
-    static_assert(traits_::IsValueType_v< V_t >, "Value must be one of properties types");
-    Property prop = traits_::PropertyFromValueEnum_v< V_t >;
-    auto val = toNum(value);
-    return getObj_(obj) & getProp_(obj, prop) & getVal_(obj, value);
   }
 
   template < class Enum_Val_t >

@@ -6,20 +6,13 @@
 
 namespace bddHelper
 {
-  BDDHelper::BDDHelper(vect< bdd > objects, vect< vect< bdd > > props, vect< vect< vect< bdd > > > values) :
-    o_(std::move(objects)),
-    p_(std::move(props)),
+  BDDHelper::BDDHelper(vect< vect< vect< bdd > > > values) :
     v_(std::move(values))
   {
     assert(("Incorrect size found",
-            o_.size() == nObjs and
-            p_.size() == nObjs and
-            p_[0].size() == nProps and
-            p_.size() * p_[0].size() == nPropsVars and
             v_.size() == nObjs and
             v_[0].size() == nProps and
-            v_.size() * v_[0].size() == nPropsVars and
-            v_.size() * v_[0].size() * v_[0][0].size() == nValuesVars));
+            v_[0][0].size() == nValueBits));
   }
 
   std::vector<bdd> BDDHelper::getValueVars(Object obj, Property prop)
@@ -27,19 +20,6 @@ namespace bddHelper
     auto objNum = toNum(obj);
     auto propNum = toNum(prop);
     return v_[objNum][propNum];
-  }
-
-  bdd BDDHelper::getObj_(Object obj)
-  {
-    auto val = toNum(obj);
-    return o_[val];
-  }
-
-  bdd BDDHelper::getProp_(Object obj, Property prop)
-  {
-    auto objNum = toNum(obj);
-    auto propNum = toNum(prop);
-    return p_[objNum][propNum];
   }
 
   bdd BDDHelper::numToBin(int num, vect< bdd > vars)
@@ -87,17 +67,14 @@ bddHelper::BDDHelper::BDDHelper()
 TEST_F(VarsSetupFixture, BDDHelperbasic)
 {
   using namespace bddHelper;
-  EXPECT_EQ(nTotalVars, 9 * 4 * 4 + 9 * 4 + 9);
+  EXPECT_EQ(nTotalVars, 9 * 4 * 4);
   EXPECT_EQ(vars.size(), nTotalVars);
-  EXPECT_EQ(o[4], vars[4]);
-  EXPECT_EQ(p[0][0], vars[9]);
-  EXPECT_EQ(p[0][1], vars[10]);
-  EXPECT_EQ(v[0][0][0], vars[9 * 4 + 9]);
-  EXPECT_EQ(h.getProp_(Object::FIRST, Property::ANIMAL), p[0][3]);
+  EXPECT_EQ(v[0][0][0], vars[0]);
+  EXPECT_EQ(v[0][1][0], vars[nValueBits]);
   EXPECT_EQ(h.getObjectAndVal(Object::THIRD, Color::BLUE),
-    o[2] & p[2][0] & not v[2][0][0] & not v[2][0][1] & v[2][0][2] & not v[2][0][3]);
+    not v[2][0][0] & not v[2][0][1] & v[2][0][2] & not v[2][0][3]);
   EXPECT_EQ(h.getObjectAndVal(Object::SECOND, Animal::BIRD),
-    o[1] & p[1][3] & not v[1][3][0] & v[1][3][1] & v[1][3][2] & not v[1][3][3]);
+    not v[1][3][0] & v[1][3][1] & v[1][3][2] & not v[1][3][3]);
 }
 
 #endif
