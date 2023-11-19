@@ -48,6 +48,7 @@ int main()
   BDDHelper h(v);
   BDDFormulaBuilder builder;
   conditions::addConditions(h, builder);
+  std::cout << "Bdd formula created.\n";
   std::cout << bdd_satcount(builder.result()) << '\n';
   bdd_done();
   return 0;
