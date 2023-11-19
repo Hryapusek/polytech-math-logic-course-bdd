@@ -247,11 +247,6 @@ namespace
           [&](auto objNum2) {
           auto obj2 = static_cast< Object >(objNum2);
           builder.addConditionTh(notEqual(h.getValueVars(obj1, prop), h.getValueVars(obj2, prop)));
-          auto valsRange = std::views::iota(0, BDDHelper::nVals);
-          std::for_each(std::execution::par, valsRange.begin(), valsRange.end(),
-            [&](auto valNum) {
-            builder.addConditionTh(notEqual(h.getValueVars(obj1, prop), h.getValueVars(obj2, prop)));
-          });
         });
       });
     });
