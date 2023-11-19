@@ -18,10 +18,10 @@ add_executable(${target}
   src/main.cpp
   ${SOURCE_LIST}
 )
-if (CMAKE_BUILD_TYPE STREQUAL "Release")
-  message("Type set to Release. Enabling super optimization")
-  target_compile_options(${target} PUBLIC -O3)
-endif()
+# if (CMAKE_BUILD_TYPE STREQUAL "Release")
+#   message("Type set to Release. Enabling super optimization")
+#   target_compile_options(${target} PUBLIC -O3)
+# endif()
 set_target_properties(${target} PROPERTIES CXX_STANDARD 23)
 target_link_libraries(${target} PUBLIC ${buddyLib})
 target_include_directories(${target} PUBLIC include)
