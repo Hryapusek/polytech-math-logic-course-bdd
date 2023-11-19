@@ -74,10 +74,10 @@ namespace
     auto resultFormulaToAdd = bdd_false();
     for (auto i : std::views::iota(0, BDDHelper::nObjs))
     {
-      auto house = static_cast< Object >(i);
+      auto obj = static_cast< Object >(i);
       auto formulas = bdd_true();
-      std::apply([&formulas, &h, &house](auto &&... args) {
-        ((formulas &= h.getObjectVal(house, args)), ...);
+      std::apply([&formulas, &h, &obj](auto &&... args) {
+        ((formulas &= h.getObjectVal(obj, args)), ...);
       }, values);
       resultFormulaToAdd |= formulas;
     }
