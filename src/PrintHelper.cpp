@@ -15,6 +15,8 @@ std::string to_string(bddHelper::Object obj)
     case Object::EIGTH:   return "Object #8";
     case Object::NINETH:  return "Object #9";
   }
+  assert(("Bad enum value", false));
+  std::unreachable();
 }
 
 std::string to_string(bddHelper::Property prop)
@@ -27,6 +29,8 @@ std::string to_string(bddHelper::Property prop)
     case Property::COLOR:    return "Color";
     case Property::PLANT:    return "Plant";
   }
+  assert(("Bad enum value", false));
+  std::unreachable();
 }
 
 std::string to_string(bddHelper::Color col)
@@ -44,6 +48,8 @@ std::string to_string(bddHelper::Color col)
     case Color::WHITE: return "WHITE";
     case Color::YELLOW: return "YELLOW";
   }
+  assert(("Bad enum value", false));
+  std::unreachable();
 }
 
 std::string to_string(bddHelper::Nation nat)
@@ -61,6 +67,8 @@ std::string to_string(bddHelper::Nation nat)
     case Nation::RUSSIAN: return "RUSSIAN";
     case Nation::UKRAINE: return "UKRAINE";
   }
+  assert(("Bad enum value", false));
+  std::unreachable();
 }
 
 std::string to_string(bddHelper::Plant plant)
@@ -78,6 +86,8 @@ std::string to_string(bddHelper::Plant plant)
     case Plant::SLIVA: return "SLIVA";
     case Plant::VINOGR: return "VINOGR";
   }
+  assert(("Bad enum value", false));
+  std::unreachable();
 }
 
 std::string to_string(bddHelper::Animal animal)
@@ -95,4 +105,6 @@ std::string to_string(bddHelper::Animal animal)
     case Animal::LION: return "LION";
     case Animal::REPTILIES: return "REPTILIES";
   }
+  assert(("Bad enum value", false));
+  std::unreachable();
 }
