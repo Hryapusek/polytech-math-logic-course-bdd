@@ -3,7 +3,7 @@ find_library(buddyLib buddy HINTS ./lib REQUIRED)
 project(bdd_example LANGUAGES CXX C)
 set(target bdd_main)
 set(CMAKE_CXX_STANDARD 23)
-option(BUILD_TEST ON)
+option(BUILD_TEST OFF)
 set(SOURCE_LIST 
   include/bdd.h
   src/BDDHelper.hpp
