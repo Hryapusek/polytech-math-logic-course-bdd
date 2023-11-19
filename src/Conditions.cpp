@@ -39,6 +39,7 @@ namespace
   std::vector rightNeighbourXYOffset = { 1, 1 };
   constexpr bool vertSkleika = false;
   constexpr bool horSkleika = false;
+  constexpr bool useSkleika = vertSkleika || horSkleika;
 
   template < class ... V_ts >
   void addLoopCondition(std::tuple< V_ts... > values, BDDHelper &h, BDDFormulaBuilder &builder);
@@ -279,15 +280,31 @@ namespace
 
   void addFirstCondition(BDDHelper &h, BDDFormulaBuilder &builder)
   {
-    builder.addCondition(h.getObjectVal(Object::FIRST, Nation::UKRAINE));
-    builder.addCondition(h.getObjectVal(Object::SECOND, Nation::BELORUS));
-    builder.addCondition(h.getObjectVal(Object::THIRD, Nation::GRUZIN));
-    builder.addCondition(h.getObjectVal(Object::FOURTH, Nation::HISPANE));
-    // builder.addCondition(h.getObjectVal(Object::FIFTH, Nation::CHINA));
-    builder.addCondition(h.getObjectVal(Object::SIXTH, Nation::RUSSIAN));
-    builder.addCondition(h.getObjectVal(Object::SEVENTH, Nation::CHE4ENCI));
-    // builder.addCondition(h.getObjectVal(Object::EIGTH, Nation::ARMENIAN));
-    builder.addCondition(h.getObjectVal(Object::NINETH, Nation::KAZAH));
+    if (not useSkleika)
+    {
+
+      builder.addCondition(h.getObjectVal(Object::FIRST, Nation::UKRAINE));
+      builder.addCondition(h.getObjectVal(Object::SECOND, Nation::BELORUS));
+      builder.addCondition(h.getObjectVal(Object::THIRD, Nation::GRUZIN));
+      // builder.addCondition(h.getObjectVal(Object::FOURTH, Nation::HISPANE));
+      // builder.addCondition(h.getObjectVal(Object::FIFTH, Nation::CHINA));
+      // builder.addCondition(h.getObjectVal(Object::SIXTH, Nation::RUSSIAN));
+      // builder.addCondition(h.getObjectVal(Object::SEVENTH, Nation::CHE4ENCI));
+      // builder.addCondition(h.getObjectVal(Object::EIGTH, Nation::ARMENIAN));
+      // builder.addCondition(h.getObjectVal(Object::NINETH, Nation::KAZAH));
+    }
+    else
+    {
+      // builder.addCondition(h.getObjectVal(Object::FIRST, Nation::UKRAINE));
+      // builder.addCondition(h.getObjectVal(Object::SECOND, Nation::BELORUS));
+      // builder.addCondition(h.getObjectVal(Object::THIRD, Nation::GRUZIN));
+      builder.addCondition(h.getObjectVal(Object::FOURTH, Nation::HISPANE));
+      builder.addCondition(h.getObjectVal(Object::FIFTH, Nation::CHINA));
+      builder.addCondition(h.getObjectVal(Object::SIXTH, Nation::RUSSIAN));
+      // builder.addCondition(h.getObjectVal(Object::SEVENTH, Nation::CHE4ENCI));
+      // builder.addCondition(h.getObjectVal(Object::EIGTH, Nation::ARMENIAN));
+      // builder.addCondition(h.getObjectVal(Object::NINETH, Nation::KAZAH));
+    }
   }
 
   void addSecondCondition(BDDHelper &h, BDDFormulaBuilder &builder)
@@ -325,12 +342,23 @@ namespace
 
   void addThirdCondition(BDDHelper &h, BDDFormulaBuilder &builder)
   {
-    addLeftNeighbors(Color::RED, Color::GREEN, h, builder);
+    // addLeftNeighbors(Color::RED, Color::GREEN, h, builder);
   }
 
   void addFourthCondition(BDDHelper &h, BDDFormulaBuilder &builder)
   {
-    addNeighbors(Nation::CHINA, Nation::ARMENIAN, h, builder);
+    if (not useSkleika)
+    {
+      addNeighbors(Nation::CHINA, Nation::ARMENIAN, h, builder);
+      addNeighbors(Nation::RUSSIAN, Nation::KAZAH, h, builder);
+      addNeighbors(Nation::HISPANE, Nation::CHE4ENCI, h, builder);
+    }
+    else
+    {
+      addNeighbors(Nation::GRUZIN, Nation::ARMENIAN, h, builder);
+      addNeighbors(Nation::UKRAINE, Nation::KAZAH, h, builder);
+      addNeighbors(Nation::BELORUS, Nation::CHE4ENCI, h, builder);
+    }
   }
 }
 
@@ -363,7 +391,7 @@ TEST_F(VarsSetupFixture, Conditions_Equality)
 
 TEST(Neighbours, leftNeighbourCheckNoSkleika)
 {
-  if (vertSkleika || horSkleika)
+  if (useSkleika)
     GTEST_SKIP();
   auto res = getLeftNeighbour(Object::FIFTH);
   EXPECT_TRUE(res.has_value());
@@ -372,7 +400,7 @@ TEST(Neighbours, leftNeighbourCheckNoSkleika)
 
 TEST(Neighbours, rightNeighbourCheckNoSkleika)
 {
-  if (vertSkleika || horSkleika)
+  if (useSkleika)
     GTEST_SKIP();
   auto res = getRightNeighbour(Object::SECOND);
   EXPECT_TRUE(res.has_value());
