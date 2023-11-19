@@ -76,7 +76,7 @@ void printObjects()
       int valNum = (varset.at(baseIndex) << 3) +
                    (varset.at(baseIndex + 1) << 2) +
                    (varset.at(baseIndex + 2) << 1) +
-                   varset.at(baseIndex + 3);
+                   (varset.at(baseIndex + 3) << 0);
       printProp(prop, valNum);
     }
     std::cout << "}\n";
