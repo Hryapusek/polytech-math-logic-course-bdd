@@ -155,14 +155,8 @@ namespace
     });
   }
 
-  void addFirstCondition(BDDHelper &h, BDDFormulaBuilder &builder)
-  {
-    builder.addCondition(h.getObjectAndVal(Object::FIRST, Nation::BELORUS));
-  }
-
   void addUniqueCondition(BDDHelper &h, BDDFormulaBuilder &builder)
   {
-    auto resFormulaToAdd = bdd_true();
     for (auto propNum : std::views::iota(0, BDDHelper::nProps))
     {
       auto prop = static_cast< Property >(propNum);
@@ -172,11 +166,13 @@ namespace
         for (auto objNum2 : std::views::iota(objNum1 + 1, BDDHelper::nObjs))
         {
           auto obj2 = static_cast< Object >(objNum2);
-          resFormulaToAdd &= notEqual(h.getValueVars(obj1, prop), h.getValueVars(obj2, prop));
+          for (auto valNum : std::views::iota(0, BDDHelper::nVals))
+          {
+            builder.setFormula(builder.result() & notEqual(h.getValueVars(obj1, prop), h.getValueVars(obj2, prop)));
+          }
         }
       }
     }
-    builder.addCondition(resFormulaToAdd);
   }
 
   void addValuesUpperBoundCondition(BDDHelper &h, BDDFormulaBuilder &builder)
@@ -197,9 +193,42 @@ namespace
     builder.addCondition(resFormulaToAdd);
   }
 
+  void addFirstCondition(BDDHelper &h, BDDFormulaBuilder &builder)
+  {
+    // builder.addCondition(h.getObjectVal(Object::FIRST, Nation::BELORUS));
+  }
+
   void addSecondCondition(BDDHelper &h, BDDFormulaBuilder &builder)
   {
-    addLoopCondition(std::make_tuple(Nation::BELORUS, Animal::DOG), h, builder);
+    addLoopCondition(std::make_tuple(Nation::UKRAINE, Animal::DOG), h, builder);
+    addLoopCondition(std::make_tuple(Nation::BELORUS, Animal::CAT), h, builder);
+    addLoopCondition(std::make_tuple(Nation::GRUZIN, Animal::REPTILIES), h, builder);
+    addLoopCondition(std::make_tuple(Nation::HISPANE, Animal::HOMYAK), h, builder);
+    addLoopCondition(std::make_tuple(Nation::CHINA, Animal::FISH), h, builder);
+    addLoopCondition(std::make_tuple(Nation::RUSSIAN, Animal::HORSE), h, builder);
+    addLoopCondition(std::make_tuple(Nation::CHE4ENCI, Animal::BIRD), h, builder);
+    addLoopCondition(std::make_tuple(Nation::ARMENIAN, Animal::LION), h, builder);
+    addLoopCondition(std::make_tuple(Nation::KAZAH, Animal::ELEPHANT), h, builder);
+
+    addLoopCondition(std::make_tuple(Nation::UKRAINE, Plant::MALINA), h, builder);
+    addLoopCondition(std::make_tuple(Nation::BELORUS, Plant::CHERRY), h, builder);
+    addLoopCondition(std::make_tuple(Nation::GRUZIN, Plant::KRIZH), h, builder);
+    addLoopCondition(std::make_tuple(Nation::HISPANE, Plant::KLUBN), h, builder);
+    addLoopCondition(std::make_tuple(Nation::CHINA, Plant::VINOGR), h, builder);
+    addLoopCondition(std::make_tuple(Nation::RUSSIAN, Plant::SLIVA), h, builder);
+    addLoopCondition(std::make_tuple(Nation::CHE4ENCI, Plant::GRUSHA), h, builder);
+    addLoopCondition(std::make_tuple(Nation::ARMENIAN, Plant::APPLE), h, builder);
+    addLoopCondition(std::make_tuple(Nation::KAZAH, Plant::PINEAPPLE), h, builder);
+
+    addLoopCondition(std::make_tuple(Nation::UKRAINE, static_cast< Color >(0)), h, builder);
+    addLoopCondition(std::make_tuple(Nation::BELORUS, static_cast< Color >(1)), h, builder);
+    addLoopCondition(std::make_tuple(Nation::GRUZIN, static_cast< Color >(2)), h, builder);
+    addLoopCondition(std::make_tuple(Nation::HISPANE, static_cast< Color >(3)), h, builder);
+    addLoopCondition(std::make_tuple(Nation::CHINA, static_cast< Color >(4)), h, builder);
+    addLoopCondition(std::make_tuple(Nation::RUSSIAN, static_cast< Color >(5)), h, builder);
+    addLoopCondition(std::make_tuple(Nation::CHE4ENCI, static_cast< Color >(6)), h, builder);
+    addLoopCondition(std::make_tuple(Nation::ARMENIAN, static_cast< Color >(7)), h, builder);
+    addLoopCondition(std::make_tuple(Nation::KAZAH, static_cast< Color >(8)), h, builder);
   }
 
   void addThirdCondition(BDDHelper &h, BDDFormulaBuilder &builder)
@@ -219,8 +248,8 @@ namespace conditions
   {
     addFirstCondition(h, builder);
     addSecondCondition(h, builder);
-    addThirdCondition(h, builder);
-    addFourthCondition(h, builder);
+    // addThirdCondition(h, builder);
+    // addFourthCondition(h, builder);
     addUniqueCondition(h, builder);
     addValuesUpperBoundCondition(h, builder);
   }
@@ -237,7 +266,7 @@ TEST_F(VarsSetupFixture, Conditions_Equality)
   using namespace bddHelper;
   EXPECT_EQ(equal(v[0][0][0], v[0][0][0]), bdd_true());
   EXPECT_EQ(equal(v[0][0][0], not v[0][0][0]), bdd_false());
-  EXPECT_EQ(notEqual(v[0][0], {v[0][0][0], not v[0][0][1], v[0][0][2], v[0][0][3]}), bdd_true());
+  EXPECT_EQ(notEqual(v[0][0], { v[0][0][0], not v[0][0][1], v[0][0][2], v[0][0][3] }), bdd_true());
 }
 
 TEST(Neighbours, leftNeighbourCheck)
@@ -267,15 +296,15 @@ TEST_F(VarsSetupFixture, Conditions_LoopCondition)
   using namespace bddHelper;
   BDDFormulaBuilder build;
   addLoopCondition(std::make_tuple(Color::RED), h, build);
-  auto expectedResult = h.getObjectAndVal(Object::FIRST, Color::RED);
-  expectedResult |= h.getObjectAndVal(Object::SECOND, Color::RED);
-  expectedResult |= h.getObjectAndVal(Object::THIRD, Color::RED);
-  expectedResult |= h.getObjectAndVal(Object::FOURTH, Color::RED);
-  expectedResult |= h.getObjectAndVal(Object::FIFTH, Color::RED);
-  expectedResult |= h.getObjectAndVal(Object::SIXTH, Color::RED);
-  expectedResult |= h.getObjectAndVal(Object::SEVENTH, Color::RED);
-  expectedResult |= h.getObjectAndVal(Object::EIGTH, Color::RED);
-  expectedResult |= h.getObjectAndVal(Object::NINETH, Color::RED);
+  auto expectedResult = h.getObjectVal(Object::FIRST, Color::RED);
+  expectedResult |= h.getObjectVal(Object::SECOND, Color::RED);
+  expectedResult |= h.getObjectVal(Object::THIRD, Color::RED);
+  expectedResult |= h.getObjectVal(Object::FOURTH, Color::RED);
+  expectedResult |= h.getObjectVal(Object::FIFTH, Color::RED);
+  expectedResult |= h.getObjectVal(Object::SIXTH, Color::RED);
+  expectedResult |= h.getObjectVal(Object::SEVENTH, Color::RED);
+  expectedResult |= h.getObjectVal(Object::EIGTH, Color::RED);
+  expectedResult |= h.getObjectVal(Object::NINETH, Color::RED);
   EXPECT_EQ(build.result(), expectedResult);
 }
 
@@ -284,28 +313,28 @@ TEST_F(VarsSetupFixture, Conditions_NeighborsCondition)
   using namespace bddHelper;
   BDDFormulaBuilder build;
   addNeighbors(Color::RED, Color::GREEN, h, build);
-  auto expectedResult = h.getObjectAndVal(Object::SECOND, Color::RED) & h.getObjectAndVal(Object::FIRST, Color::GREEN);
+  auto expectedResult = h.getObjectVal(Object::SECOND, Color::RED) & h.getObjectVal(Object::FIRST, Color::GREEN);
 
-  expectedResult |= h.getObjectAndVal(Object::THIRD, Color::RED) & h.getObjectAndVal(Object::FIRST, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::THIRD, Color::RED) & h.getObjectAndVal(Object::SECOND, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::THIRD, Color::RED) & h.getObjectVal(Object::FIRST, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::THIRD, Color::RED) & h.getObjectVal(Object::SECOND, Color::GREEN);
 
-  expectedResult |= h.getObjectAndVal(Object::FOURTH, Color::RED) & h.getObjectAndVal(Object::SECOND, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::FOURTH, Color::RED) & h.getObjectAndVal(Object::THIRD, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::FOURTH, Color::RED) & h.getObjectVal(Object::SECOND, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::FOURTH, Color::RED) & h.getObjectVal(Object::THIRD, Color::GREEN);
 
-  expectedResult |= h.getObjectAndVal(Object::FIFTH, Color::RED) & h.getObjectAndVal(Object::THIRD, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::FIFTH, Color::RED) & h.getObjectAndVal(Object::FOURTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::FIFTH, Color::RED) & h.getObjectVal(Object::THIRD, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::FIFTH, Color::RED) & h.getObjectVal(Object::FOURTH, Color::GREEN);
 
-  expectedResult |= h.getObjectAndVal(Object::SIXTH, Color::RED) & h.getObjectAndVal(Object::FOURTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::SIXTH, Color::RED) & h.getObjectAndVal(Object::FIFTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::SIXTH, Color::RED) & h.getObjectVal(Object::FOURTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::SIXTH, Color::RED) & h.getObjectVal(Object::FIFTH, Color::GREEN);
 
-  expectedResult |= h.getObjectAndVal(Object::SEVENTH, Color::RED) & h.getObjectAndVal(Object::FIFTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::SEVENTH, Color::RED) & h.getObjectAndVal(Object::SIXTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::SEVENTH, Color::RED) & h.getObjectVal(Object::FIFTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::SEVENTH, Color::RED) & h.getObjectVal(Object::SIXTH, Color::GREEN);
 
-  expectedResult |= h.getObjectAndVal(Object::EIGTH, Color::RED) & h.getObjectAndVal(Object::SIXTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::EIGTH, Color::RED) & h.getObjectAndVal(Object::SEVENTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::EIGTH, Color::RED) & h.getObjectVal(Object::SIXTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::EIGTH, Color::RED) & h.getObjectVal(Object::SEVENTH, Color::GREEN);
 
-  expectedResult |= h.getObjectAndVal(Object::NINETH, Color::RED) & h.getObjectAndVal(Object::SEVENTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::NINETH, Color::RED) & h.getObjectAndVal(Object::EIGTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::NINETH, Color::RED) & h.getObjectVal(Object::SEVENTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::NINETH, Color::RED) & h.getObjectVal(Object::EIGTH, Color::GREEN);
   EXPECT_EQ(build.result(), expectedResult);
 }
 
@@ -314,13 +343,13 @@ TEST_F(VarsSetupFixture, Conditions_LeftNeighborsCondition)
   using namespace bddHelper;
   BDDFormulaBuilder build;
   addLeftNeighbors(Color::RED, Color::GREEN, h, build);
-  auto expectedResult = h.getObjectAndVal(Object::THIRD, Color::RED) & h.getObjectAndVal(Object::FIRST, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::FOURTH, Color::RED) & h.getObjectAndVal(Object::SECOND, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::FIFTH, Color::RED) & h.getObjectAndVal(Object::THIRD, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::SIXTH, Color::RED) & h.getObjectAndVal(Object::FOURTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::SEVENTH, Color::RED) & h.getObjectAndVal(Object::FIFTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::EIGTH, Color::RED) & h.getObjectAndVal(Object::SIXTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::NINETH, Color::RED) & h.getObjectAndVal(Object::SEVENTH, Color::GREEN);
+  auto expectedResult = h.getObjectVal(Object::THIRD, Color::RED) & h.getObjectVal(Object::FIRST, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::FOURTH, Color::RED) & h.getObjectVal(Object::SECOND, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::FIFTH, Color::RED) & h.getObjectVal(Object::THIRD, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::SIXTH, Color::RED) & h.getObjectVal(Object::FOURTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::SEVENTH, Color::RED) & h.getObjectVal(Object::FIFTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::EIGTH, Color::RED) & h.getObjectVal(Object::SIXTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::NINETH, Color::RED) & h.getObjectVal(Object::SEVENTH, Color::GREEN);
   EXPECT_EQ(build.result(), expectedResult);
 }
 
@@ -329,14 +358,14 @@ TEST_F(VarsSetupFixture, Conditions_RightNeighborsCondition)
   using namespace bddHelper;
   BDDFormulaBuilder build;
   addRightNeighbors(Color::RED, Color::GREEN, h, build);
-  auto expectedResult = h.getObjectAndVal(Object::SECOND, Color::RED) & h.getObjectAndVal(Object::FIRST, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::THIRD, Color::RED) & h.getObjectAndVal(Object::SECOND, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::FOURTH, Color::RED) & h.getObjectAndVal(Object::THIRD, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::FIFTH, Color::RED) & h.getObjectAndVal(Object::FOURTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::SIXTH, Color::RED) & h.getObjectAndVal(Object::FIFTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::SEVENTH, Color::RED) & h.getObjectAndVal(Object::SIXTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::EIGTH, Color::RED) & h.getObjectAndVal(Object::SEVENTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::NINETH, Color::RED) & h.getObjectAndVal(Object::EIGTH, Color::GREEN);
+  auto expectedResult = h.getObjectVal(Object::SECOND, Color::RED) & h.getObjectVal(Object::FIRST, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::THIRD, Color::RED) & h.getObjectVal(Object::SECOND, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::FOURTH, Color::RED) & h.getObjectVal(Object::THIRD, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::FIFTH, Color::RED) & h.getObjectVal(Object::FOURTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::SIXTH, Color::RED) & h.getObjectVal(Object::FIFTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::SEVENTH, Color::RED) & h.getObjectVal(Object::SIXTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::EIGTH, Color::RED) & h.getObjectVal(Object::SEVENTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::NINETH, Color::RED) & h.getObjectVal(Object::EIGTH, Color::GREEN);
   EXPECT_EQ(build.result(), expectedResult);
 }
 
