@@ -33,7 +33,7 @@ namespace bddHelper
   };
   enum class Property
   {
-    H_COLOR,
+    COLOR,
     NATION,
     PLANT,
     ANIMAL
@@ -116,7 +116,7 @@ namespace bddHelper
     template < class V_t >
     struct PropertyFromValueEnum< V_t, std::enable_if_t< std::is_same_v< V_t, Color > > >
     {
-      static constexpr Property value = Property::H_COLOR;
+      static constexpr Property value = Property::COLOR;
     };
 
     template < class V_t >
