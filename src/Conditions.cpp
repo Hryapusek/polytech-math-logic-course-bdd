@@ -2,6 +2,8 @@
 #include <ranges>
 #include <tuple>
 #include <optional>
+#include <algorithm>
+#include <numeric>
 
 using namespace bddHelper;
 
@@ -28,6 +30,7 @@ namespace
   std::optional< Object > getRightNeighbour(Object obj);
   std::vector< Object > getNeighbours(Object obj);
 
+  bdd equal(bdd a, bdd b);
   bdd notEqual(std::vector< bdd > v1, std::vector< bdd > v2);
 
   void addFirstCondition(BDDHelper &h, BDDFormulaBuilder &builder);
@@ -141,10 +144,15 @@ namespace
   bdd notEqual(std::vector< bdd > a, std::vector< bdd > b)
   {
     assert(a.size() == 4 && a.size() == b.size());
-    return (not equal(a[0], b[0])) bitor
-           (not equal(a[1], b[1])) bitor
-           (not equal(a[2], b[2])) bitor
-           (not equal(a[3], b[3]));
+    return std::inner_product(
+      a.begin(),
+      a.end(),
+      b.begin(),
+      bdd_false(),
+      std::bit_or< bdd >(),
+      [](bdd a, bdd b) {
+      return not equal(a, b);
+    });
   }
 
   void addFirstCondition(BDDHelper &h, BDDFormulaBuilder &builder)
@@ -222,6 +230,15 @@ namespace conditions
 #include <gtest/gtest.h>
 #include <ranges>
 #include "TestFixture.hpp"
+//TODO remove o and p vectors
+
+TEST_F(VarsSetupFixture, Conditions_Equality)
+{
+  using namespace bddHelper;
+  EXPECT_EQ(equal(v[0][0][0], v[0][0][0]), bdd_true());
+  EXPECT_EQ(equal(v[0][0][0], not v[0][0][0]), bdd_false());
+  EXPECT_EQ(notEqual(v[0][0], {v[0][0][0], not v[0][0][1], v[0][0][2], v[0][0][3]}), bdd_true());
+}
 
 TEST(Neighbours, leftNeighbourCheck)
 {
