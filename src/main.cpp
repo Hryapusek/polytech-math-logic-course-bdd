@@ -85,7 +85,7 @@ void printObjects()
 
 int main()
 {
-  bdd_init(300000000, 10000000);
+  bdd_init(3000000, 100000);
   bdd_setvarnum(BDDHelper::nTotalVars);
   std::vector< bdd > vars;
   using namespace bddHelper;
