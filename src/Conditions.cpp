@@ -49,7 +49,7 @@ namespace
       auto house = static_cast< Object >(i);
       auto formulas = bdd_true();
       std::apply([&formulas, &h, &house](auto &&... args) {
-        ((formulas &= h.getObjectAndVal(house, args)), ...);
+        ((formulas &= h.getObjectVal(house, args)), ...);
       }, values);
       resultFormulaToAdd |= formulas;
     }
@@ -65,7 +65,7 @@ namespace
     {
       auto obj = static_cast< Object >(objNum);
       for (auto neighbObj : getNeighbours(obj))
-        resultFormulaToAdd |= (h.getObjectAndVal(obj, value1) & h.getObjectAndVal(neighbObj, value2));
+        resultFormulaToAdd |= (h.getObjectVal(obj, value1) & h.getObjectVal(neighbObj, value2));
     }
     builder.addCondition(resultFormulaToAdd);
   }
@@ -79,7 +79,7 @@ namespace
     {
       auto obj = static_cast< Object >(objNum);
       if (auto neighbObj = getLeftNeighbour(obj); neighbObj.has_value())
-        resultFormulaToAdd |= (h.getObjectAndVal(obj, value1) & h.getObjectAndVal(*neighbObj, value2));
+        resultFormulaToAdd |= (h.getObjectVal(obj, value1) & h.getObjectVal(*neighbObj, value2));
     }
     builder.addCondition(resultFormulaToAdd);
   }
@@ -93,7 +93,7 @@ namespace
     {
       auto obj = static_cast< Object >(objNum);
       if (auto neighbObj = getRightNeighbour(obj); neighbObj.has_value())
-        resultFormulaToAdd |= (h.getObjectAndVal(obj, value1) & h.getObjectAndVal(*neighbObj, value2));
+        resultFormulaToAdd |= (h.getObjectVal(obj, value1) & h.getObjectVal(*neighbObj, value2));
     }
     builder.addCondition(resultFormulaToAdd);
   }
