@@ -73,10 +73,10 @@ void printObjects()
       auto prop = static_cast< Property >(propNum);
       std::cout << '\t' << to_string(prop) << ": ";
       auto baseIndex = objNum * nProps * nValueBits + propNum * nValueBits;
-      int valNum = (varset.at(baseIndex)) * 2 * 2 * 2 +
-                   (varset.at(baseIndex + 1)) * 2 * 2 +
-                   (varset.at(baseIndex + 2)) * 2 +
-                   (varset.at(baseIndex + 3));
+      int valNum = (varset.at(baseIndex) << 3) +
+                   (varset.at(baseIndex + 1) << 2) +
+                   (varset.at(baseIndex + 2) << 1) +
+                   varset.at(baseIndex + 3);
       printProp(prop, valNum);
     }
     std::cout << "}\n";
