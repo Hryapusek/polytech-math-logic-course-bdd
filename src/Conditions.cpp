@@ -161,23 +161,27 @@ namespace
 
   void addUniqueCondition(BDDHelper &h, BDDFormulaBuilder &builder)
   {
-    for (auto propNum : std::views::iota(0, BDDHelper::nProps))
-    {
+    auto propRange = std::views::iota(0, BDDHelper::nProps);
+    std::for_each(std::execution::par, propRange.begin(), propRange.end(),
+      [&](auto propNum) {
       auto prop = static_cast< Property >(propNum);
-      for (auto objNum1 : std::views::iota(0, BDDHelper::nObjs))
-      {
+      auto obj1Range = std::views::iota(0, BDDHelper::nObjs);
+      std::for_each(std::execution::par, obj1Range.begin(), obj1Range.end(),
+        [&](auto objNum1) {
         auto obj1 = static_cast< Object >(objNum1);
-        for (auto objNum2 : std::views::iota(objNum1 + 1, BDDHelper::nObjs))
-        {
+        auto obj2Range = std::views::iota(objNum1 + 1, BDDHelper::nObjs);
+        std::for_each(std::execution::par, obj2Range.begin(), obj2Range.end(),
+          [&](auto objNum2) {
           auto obj2 = static_cast< Object >(objNum2);
-          auto range = std::views::iota(0, BDDHelper::nVals);
-          std::for_each(std::execution::par, range.begin(), range.end(),
+          builder.addConditionTh(notEqual(h.getValueVars(obj1, prop), h.getValueVars(obj2, prop)));
+          auto valsRange = std::views::iota(0, BDDHelper::nVals);
+          std::for_each(std::execution::par, valsRange.begin(), valsRange.end(),
             [&](auto valNum) {
             builder.addConditionTh(notEqual(h.getValueVars(obj1, prop), h.getValueVars(obj2, prop)));
           });
-        }
-      }
-    }
+        });
+      });
+    });
   }
 
   void addValuesUpperBoundCondition(BDDHelper &h, BDDFormulaBuilder &builder)
@@ -229,11 +233,11 @@ namespace
     addLoopCondition(std::make_tuple(Nation::BELORUS, static_cast< Color >(1)), h, builder);
     addLoopCondition(std::make_tuple(Nation::GRUZIN, static_cast< Color >(2)), h, builder);
     addLoopCondition(std::make_tuple(Nation::HISPANE, static_cast< Color >(3)), h, builder);
-    addLoopCondition(std::make_tuple(Nation::CHINA, static_cast< Color >(4)), h, builder);
-    addLoopCondition(std::make_tuple(Nation::RUSSIAN, static_cast< Color >(5)), h, builder);
-    addLoopCondition(std::make_tuple(Nation::CHE4ENCI, static_cast< Color >(6)), h, builder);
-    addLoopCondition(std::make_tuple(Nation::ARMENIAN, static_cast< Color >(7)), h, builder);
-    addLoopCondition(std::make_tuple(Nation::KAZAH, static_cast< Color >(8)), h, builder);
+    // addLoopCondition(std::make_tuple(Nation::CHINA, static_cast< Color >(4)), h, builder);
+    // addLoopCondition(std::make_tuple(Nation::RUSSIAN, static_cast< Color >(5)), h, builder);
+    // addLoopCondition(std::make_tuple(Nation::CHE4ENCI, static_cast< Color >(6)), h, builder);
+    // addLoopCondition(std::make_tuple(Nation::ARMENIAN, static_cast< Color >(7)), h, builder);
+    // addLoopCondition(std::make_tuple(Nation::KAZAH, static_cast< Color >(8)), h, builder);
   }
 
   void addThirdCondition(BDDHelper &h, BDDFormulaBuilder &builder)
