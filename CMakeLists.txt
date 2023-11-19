@@ -12,6 +12,8 @@ set(SOURCE_LIST
   src/BDDFormulaBuilder.cpp
   src/Conditions.hpp
   src/Conditions.cpp
+  src/PrintHelper.hpp
+  src/PrintHelper.cpp
   )
 
 add_executable(${target}
