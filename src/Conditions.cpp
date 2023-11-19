@@ -8,7 +8,7 @@ using namespace bddHelper;
 namespace
 {
   constexpr int leftNeighbour = -2;
-  constexpr int rightNeighbour = 2;
+  constexpr int rightNeighbour = -1;
   constexpr bool useSkleika = false;
 
   template < class ... V_ts >
@@ -23,7 +23,7 @@ namespace
   template < class V_t1, class V_t2 >
   void addRightNeighbors(V_t1 value1, V_t2 value2, BDDHelper &h, BDDFormulaBuilder &builder);
 
-
+  std::optional< Object > getNeighbour_(Object obj, int neighbourOffset);
   std::optional< Object > getLeftNeighbour(Object obj);
   std::optional< Object > getRightNeighbour(Object obj);
   std::vector< Object > getNeighbours(Object obj);
@@ -97,23 +97,27 @@ namespace
 
   std::optional< Object > getLeftNeighbour(Object obj)
   {
-    auto objNum = toNum(obj);
-    auto leftObjNum = objNum + leftNeighbour;
-    if (leftObjNum >= 0)
-      return static_cast< Object >(leftObjNum);
-    if (useSkleika)
-      return static_cast< Object >(BDDHelper::nObjs + leftObjNum);
-    return std::nullopt;
+    return getNeighbour_(obj, leftNeighbour);
   }
 
   std::optional< Object > getRightNeighbour(Object obj)
   {
+    return getNeighbour_(obj, rightNeighbour);
+  }
+
+  std::optional< Object > getNeighbour_(Object obj, int neighbourOffset)
+  {
     auto objNum = toNum(obj);
-    auto rightObjNum = objNum + rightNeighbour;
-    if (rightObjNum < BDDHelper::nObjs)
-      return static_cast< Object >(rightObjNum);
+    auto neighbObjNum = objNum + neighbourOffset;
+    if (neighbObjNum >= 0 and neighbObjNum < BDDHelper::nObjs)
+      return static_cast< Object >(neighbObjNum);
     if (useSkleika)
-      return static_cast< Object >(rightObjNum % BDDHelper::nObjs);
+    {
+      if (neighbObjNum > 0)
+        return static_cast< Object >(neighbObjNum % BDDHelper::nObjs);
+      else
+        return static_cast< Object >(BDDHelper::nObjs + neighbObjNum % BDDHelper::nObjs);
+    }
     return std::nullopt;
   }
 
@@ -234,11 +238,11 @@ TEST(Neighbours, rightNeighbourCheck)
 {
   auto res = getRightNeighbour(Object::SECOND);
   EXPECT_TRUE(res.has_value());
-  EXPECT_TRUE(*res == Object::FOURTH);
+  EXPECT_TRUE(*res == Object::FIRST);
 
   res = getRightNeighbour(Object::NINETH);
   EXPECT_TRUE(!useSkleika || res.has_value());
-  EXPECT_TRUE(!useSkleika || *res == Object::SECOND);
+  EXPECT_TRUE(!useSkleika || *res == Object::EIGTH);
 }
 
 TEST_F(VarsSetupFixture, Conditions_LoopCondition)
@@ -263,27 +267,28 @@ TEST_F(VarsSetupFixture, Conditions_NeighborsCondition)
   using namespace bddHelper;
   BDDFormulaBuilder build;
   addNeighbors(Color::RED, Color::GREEN, h, build);
-  auto expectedResult = h.getObjectAndVal(Object::FIRST, Color::RED) & h.getObjectAndVal(Object::THIRD, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::SECOND, Color::RED) & h.getObjectAndVal(Object::FOURTH, Color::GREEN);
+  auto expectedResult = h.getObjectAndVal(Object::SECOND, Color::RED) & h.getObjectAndVal(Object::FIRST, Color::GREEN);
 
   expectedResult |= h.getObjectAndVal(Object::THIRD, Color::RED) & h.getObjectAndVal(Object::FIRST, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::THIRD, Color::RED) & h.getObjectAndVal(Object::FIFTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::THIRD, Color::RED) & h.getObjectAndVal(Object::SECOND, Color::GREEN);
 
   expectedResult |= h.getObjectAndVal(Object::FOURTH, Color::RED) & h.getObjectAndVal(Object::SECOND, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::FOURTH, Color::RED) & h.getObjectAndVal(Object::SIXTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::FOURTH, Color::RED) & h.getObjectAndVal(Object::THIRD, Color::GREEN);
 
   expectedResult |= h.getObjectAndVal(Object::FIFTH, Color::RED) & h.getObjectAndVal(Object::THIRD, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::FIFTH, Color::RED) & h.getObjectAndVal(Object::SEVENTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::FIFTH, Color::RED) & h.getObjectAndVal(Object::FOURTH, Color::GREEN);
 
   expectedResult |= h.getObjectAndVal(Object::SIXTH, Color::RED) & h.getObjectAndVal(Object::FOURTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::SIXTH, Color::RED) & h.getObjectAndVal(Object::EIGTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::SIXTH, Color::RED) & h.getObjectAndVal(Object::FIFTH, Color::GREEN);
 
   expectedResult |= h.getObjectAndVal(Object::SEVENTH, Color::RED) & h.getObjectAndVal(Object::FIFTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::SEVENTH, Color::RED) & h.getObjectAndVal(Object::NINETH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::SEVENTH, Color::RED) & h.getObjectAndVal(Object::SIXTH, Color::GREEN);
 
   expectedResult |= h.getObjectAndVal(Object::EIGTH, Color::RED) & h.getObjectAndVal(Object::SIXTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::EIGTH, Color::RED) & h.getObjectAndVal(Object::SEVENTH, Color::GREEN);
 
   expectedResult |= h.getObjectAndVal(Object::NINETH, Color::RED) & h.getObjectAndVal(Object::SEVENTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::NINETH, Color::RED) & h.getObjectAndVal(Object::EIGTH, Color::GREEN);
   EXPECT_EQ(build.result(), expectedResult);
 }
 
@@ -307,13 +312,14 @@ TEST_F(VarsSetupFixture, Conditions_RightNeighborsCondition)
   using namespace bddHelper;
   BDDFormulaBuilder build;
   addRightNeighbors(Color::RED, Color::GREEN, h, build);
-  auto expectedResult = h.getObjectAndVal(Object::FIRST, Color::RED) & h.getObjectAndVal(Object::THIRD, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::SECOND, Color::RED) & h.getObjectAndVal(Object::FOURTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::THIRD, Color::RED) & h.getObjectAndVal(Object::FIFTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::FOURTH, Color::RED) & h.getObjectAndVal(Object::SIXTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::FIFTH, Color::RED) & h.getObjectAndVal(Object::SEVENTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::SIXTH, Color::RED) & h.getObjectAndVal(Object::EIGTH, Color::GREEN);
-  expectedResult |= h.getObjectAndVal(Object::SEVENTH, Color::RED) & h.getObjectAndVal(Object::NINETH, Color::GREEN);
+  auto expectedResult = h.getObjectAndVal(Object::SECOND, Color::RED) & h.getObjectAndVal(Object::FIRST, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::THIRD, Color::RED) & h.getObjectAndVal(Object::SECOND, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::FOURTH, Color::RED) & h.getObjectAndVal(Object::THIRD, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::FIFTH, Color::RED) & h.getObjectAndVal(Object::FOURTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::SIXTH, Color::RED) & h.getObjectAndVal(Object::FIFTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::SEVENTH, Color::RED) & h.getObjectAndVal(Object::SIXTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::EIGTH, Color::RED) & h.getObjectAndVal(Object::SEVENTH, Color::GREEN);
+  expectedResult |= h.getObjectAndVal(Object::NINETH, Color::RED) & h.getObjectAndVal(Object::EIGTH, Color::GREEN);
   EXPECT_EQ(build.result(), expectedResult);
 }
 
