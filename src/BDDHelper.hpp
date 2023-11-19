@@ -168,8 +168,6 @@ namespace bddHelper
     bdd numToBin(int num, vect< bdd > vars);
 
     bdd numToBinUnsafe(int num, vect< bdd > vars);
-    
-    bdd getObjectVal(int objNum, int propNum, int valNum);
 
   private:
   #ifdef GTEST_TESTING
