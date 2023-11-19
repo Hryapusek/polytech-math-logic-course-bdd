@@ -4,6 +4,10 @@
 #include <optional>
 #include <algorithm>
 #include <numeric>
+#include <execution>
+
+// TODO fix neighbours
+// TODO add left right skleika
 
 using namespace bddHelper;
 
@@ -166,10 +170,11 @@ namespace
         for (auto objNum2 : std::views::iota(objNum1 + 1, BDDHelper::nObjs))
         {
           auto obj2 = static_cast< Object >(objNum2);
-          for (auto valNum : std::views::iota(0, BDDHelper::nVals))
-          {
-            builder.setFormula(builder.result() & notEqual(h.getValueVars(obj1, prop), h.getValueVars(obj2, prop)));
-          }
+          auto range = std::views::iota(0, BDDHelper::nVals);
+          std::for_each(std::execution::par, range.begin(), range.end(),
+            [&](auto valNum) {
+            builder.addConditionTh(notEqual(h.getValueVars(obj1, prop), h.getValueVars(obj2, prop)));
+          });
         }
       }
     }
