@@ -329,15 +329,15 @@ namespace
     addLoopCondition(std::make_tuple(Nation::ARMENIAN, Plant::APPLE), h, builder);
     addLoopCondition(std::make_tuple(Nation::KAZAH, Plant::PINEAPPLE), h, builder);
 
-    addLoopCondition(std::make_tuple(Nation::UKRAINE, static_cast< Color >(0)), h, builder);
-    addLoopCondition(std::make_tuple(Nation::BELORUS, static_cast< Color >(1)), h, builder);
-    addLoopCondition(std::make_tuple(Nation::GRUZIN, static_cast< Color >(2)), h, builder);
-    addLoopCondition(std::make_tuple(Nation::HISPANE, static_cast< Color >(3)), h, builder);
-    addLoopCondition(std::make_tuple(Nation::CHINA, static_cast< Color >(4)), h, builder);
-    addLoopCondition(std::make_tuple(Nation::RUSSIAN, static_cast< Color >(5)), h, builder);
-    addLoopCondition(std::make_tuple(Nation::CHE4ENCI, static_cast< Color >(6)), h, builder);
-    addLoopCondition(std::make_tuple(Nation::ARMENIAN, static_cast< Color >(7)), h, builder);
-    addLoopCondition(std::make_tuple(Nation::KAZAH, static_cast< Color >(8)), h, builder);
+    addLoopCondition(std::make_tuple(Nation::UKRAINE, Color::RED), h, builder);
+    addLoopCondition(std::make_tuple(Nation::BELORUS, Color::GREEN), h, builder);
+    addLoopCondition(std::make_tuple(Nation::GRUZIN, Color::BLUE), h, builder);
+    addLoopCondition(std::make_tuple(Nation::HISPANE, Color::YELLOW), h, builder);
+    addLoopCondition(std::make_tuple(Nation::CHINA, Color::WHITE), h, builder);
+    addLoopCondition(std::make_tuple(Nation::RUSSIAN, Color::PURPLE), h, builder);
+    addLoopCondition(std::make_tuple(Nation::CHE4ENCI, Color::BROWN), h, builder);
+    addLoopCondition(std::make_tuple(Nation::ARMENIAN, Color::AQUA), h, builder);
+    addLoopCondition(std::make_tuple(Nation::KAZAH, Color::BEIGE), h, builder);
   }
 
   void addThirdCondition(BDDHelper &h, BDDFormulaBuilder &builder)
