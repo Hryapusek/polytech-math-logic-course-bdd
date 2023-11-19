@@ -21,7 +21,7 @@ class VarsSetupFixture;
 
 namespace bddHelper
 {
-  enum class House
+  enum class Object
   {
     FIRST,
     SECOND,
@@ -40,7 +40,7 @@ namespace bddHelper
     PLANT,
     ANIMAL
   };
-  enum class H_Color
+  enum class Color
   {
     RED,
     GREEN,
@@ -98,7 +98,7 @@ namespace bddHelper
   {
     template
     < class V_t, class = std::enable_if_t<
-      std::is_same_v< V_t, H_Color > ||
+      std::is_same_v< V_t, Color > ||
       std::is_same_v< V_t, Nation > ||
       std::is_same_v< V_t, Plant > ||
       std::is_same_v< V_t, Animal > > >
@@ -116,7 +116,7 @@ namespace bddHelper
     };
 
     template < class V_t >
-    struct PropertyFromValueEnum< V_t, std::enable_if_t< std::is_same_v< V_t, H_Color > > >
+    struct PropertyFromValueEnum< V_t, std::enable_if_t< std::is_same_v< V_t, Color > > >
     {
       static constexpr Property value = Property::H_COLOR;
     };
@@ -162,7 +162,13 @@ namespace bddHelper
     BDDHelper(vect< bdd > objects, vect< vect< bdd > > props, vect< vect< vect< bdd > > > values);
 
     template< class V_t >
-    bdd getHouseAndVal(House obj, V_t value);
+    bdd getHouseAndVal(Object obj, V_t value);
+
+    std::vector< bdd > getValueVars(Object obj, Property prop);
+
+    bdd numToBin(int num, vect< bdd > vars);
+
+    bdd numToBinUnsafe(int num, vect< bdd > vars);
 
   private:
   #ifdef GTEST_TESTING
@@ -175,28 +181,26 @@ namespace bddHelper
 
     BDDHelper();
 
-    bdd getObj_(House obj);
+    bdd getObj_(Object obj);
 
-    bdd getProp_(House obj, Property prop);
+    bdd getProp_(Object obj, Property prop);
 
     template< class V_t >
-    bdd getVal_(House obj, V_t value);
-
-    bdd fromNum(int num, vect< bdd > vars);
+    bdd getVal_(Object obj, V_t value);
   };
 
   template < class V_t >
-  inline bdd BDDHelper::getVal_(House obj, V_t value)
+  inline bdd BDDHelper::getVal_(Object obj, V_t value)
   {
     static_assert(traits_::IsValueType_v< V_t >, "Value must be one of properties type");
     auto objNum = toNum(obj);
     auto propNum = toNum(traits_::PropertyFromValueEnum_v< V_t >);
     auto valNum = toNum(value);
-    return fromNum(valNum, v_[objNum][propNum]);
+    return numToBin(valNum, v_[objNum][propNum]);
   }
 
   template < class V_t >
-  inline bdd BDDHelper::getHouseAndVal(House obj, V_t value)
+  inline bdd BDDHelper::getHouseAndVal(Object obj, V_t value)
   {
     static_assert(traits_::IsValueType_v< V_t >, "Value must be one of properties types");
     Property prop = traits_::PropertyFromValueEnum_v< V_t >;

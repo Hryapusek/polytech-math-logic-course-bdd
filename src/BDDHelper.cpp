@@ -22,23 +22,37 @@ namespace bddHelper
             v_.size() * v_[0].size() * v_[0][0].size() == nValuesVars));
   }
 
-  bdd BDDHelper::getObj_(House obj)
+  std::vector<bdd> BDDHelper::getValueVars(Object obj, Property prop)
+  {
+    auto objNum = toNum(obj);
+    auto propNum = toNum(prop);
+    return v_[objNum][propNum];
+  }
+
+  bdd BDDHelper::getObj_(Object obj)
   {
     auto val = toNum(obj);
     return o_[val];
   }
 
-  bdd BDDHelper::getProp_(House obj, Property prop)
+  bdd BDDHelper::getProp_(Object obj, Property prop)
   {
     auto objNum = toNum(obj);
     auto propNum = toNum(prop);
     return p_[objNum][propNum];
   }
 
-  bdd BDDHelper::fromNum(int num, vect< bdd > vars)
+  bdd BDDHelper::numToBin(int num, vect< bdd > vars)
   {
     assert(vars.size() == 4);
     assert(num >= 0 and num <= 8);
+    return numToBinUnsafe(num, vars);
+  }
+
+  bdd BDDHelper::numToBinUnsafe(int num, vect<bdd> vars)
+  {
+    assert(vars.size() == 4);
+    assert(num >= 0 and num <= 15);
     auto resFormula = bdd_true();
     auto currentNum = num;
     for (auto var : std::views::reverse(vars))
@@ -79,10 +93,10 @@ TEST_F(VarsSetupFixture, BDDHelperbasic)
   EXPECT_EQ(p[0][0], vars[9]);
   EXPECT_EQ(p[0][1], vars[10]);
   EXPECT_EQ(v[0][0][0], vars[9 * 4 + 9]);
-  EXPECT_EQ(h.getProp_(House::FIRST, Property::ANIMAL), p[0][3]);
-  EXPECT_EQ(h.getHouseAndVal(House::THIRD, H_Color::BLUE),
+  EXPECT_EQ(h.getProp_(Object::FIRST, Property::ANIMAL), p[0][3]);
+  EXPECT_EQ(h.getHouseAndVal(Object::THIRD, Color::BLUE),
     o[2] & p[2][0] & not v[2][0][0] & not v[2][0][1] & v[2][0][2] & not v[2][0][3]);
-  EXPECT_EQ(h.getHouseAndVal(House::SECOND, Animal::BIRD),
+  EXPECT_EQ(h.getHouseAndVal(Object::SECOND, Animal::BIRD),
     o[1] & p[1][3] & not v[1][3][0] & v[1][3][1] & v[1][3][2] & not v[1][3][3]);
 }
 
