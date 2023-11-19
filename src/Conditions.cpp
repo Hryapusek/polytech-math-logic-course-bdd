@@ -7,9 +7,6 @@
 #include <execution>
 #include <functional>
 
-// TODO fix neighbours
-// TODO add left right skleika
-
 using namespace bddHelper;
 
 namespace std
