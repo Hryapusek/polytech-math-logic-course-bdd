@@ -6,13 +6,31 @@
 
 namespace bddHelper
 {
-  BDDHelper::BDDHelper(vect< vect< vect< bdd > > > vars) :
-    vars_(std::move(vars))
+  /**
+   * We have seen structedVars in main.cpp
+   */
+  BDDHelper::BDDHelper(vect< vect< vect< bdd > > > structedVars) :
+    structVars_(std::move(structedVars))
   {
+    // Check the sizes to be sure we haven't made a mistake yet...
     assert(("Incorrect size found",
-            vars_.size() == nObjs and
-            vars_[0].size() == nProps and
-            vars_[0][0].size() == nValueBits));
+            structVars_.size() == nObjs and
+            structVars_[0].size() == nProps and
+            structVars_[0][0].size() == nValueBits));
+    /**
+     * If we want to say, that second object's third property 
+     * MUST have value 5 - we would say
+     * ```
+     * auto condition = not structVars_[1][2][0] & 
+     *                  structVars_[1][2][1] &
+     *                  not structVars_[1][2][2] & 
+     *                  structVars_[1][2][3];
+     * ```
+     * because value 5 is 0101.
+     * Our new array values_[1][2][5] will contain
+     * exactly what 'condition' var contains.
+     * It's like precomputed values optimization.
+     */
     values_ = vect< vect< vect< bdd > > >(nObjs);
     for (auto objNum : std::views::iota(0, nObjs))
     {
@@ -22,7 +40,7 @@ namespace bddHelper
         values_[objNum][propNum] = vect< bdd > (nVals);
         for (auto valNum : std::views::iota(0, nVals))
         {
-          values_[objNum][propNum][valNum] = numToBin(valNum, vars_[objNum][propNum]);
+          values_[objNum][propNum][valNum] = numToBin(valNum, structVars_[objNum][propNum]);
         }
       }
     }
@@ -32,7 +50,7 @@ namespace bddHelper
   {
     auto objNum = toNum(obj);
     auto propNum = toNum(prop);
-    return vars_[objNum][propNum];
+    return structVars_[objNum][propNum];
   }
 
   bdd BDDHelper::numToBin(int num, vect< bdd > vars)

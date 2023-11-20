@@ -8,7 +8,14 @@
 #include <cmath>
 #include "bdd.h"
 
-#ifdef GTEST_TESTING
+/**
+ * Wherever in prog you see GTEST_TESTING or gtest or anything
+ * like this - just ignore that. I used it for my variant, to test
+ * if functions work correctly. After you change variant - test wont work
+ * properly. So just \b ignore \b them.
+ */
+
+#ifdef GTEST_TESTING // ignore
 
 #include <gtest/gtest.h>
 
@@ -19,6 +26,9 @@ class VarsSetupFixture;
 
 namespace bddHelper
 {
+  /**
+   * Here we have enum, that represents objects.
+   */
   enum class Object
   {
     FIRST,
@@ -31,6 +41,10 @@ namespace bddHelper
     EIGTH,
     NINETH
   };
+
+  /**
+   * This enum represents each object properties
+   */
   enum class Property
   {
     COLOR,
@@ -38,6 +52,11 @@ namespace bddHelper
     PLANT,
     ANIMAL
   };
+
+  /**
+   * Enums below represent each property values
+   */
+
   enum class Color
   {
     RED,
@@ -87,11 +106,33 @@ namespace bddHelper
     ELEPHANT
   };
 
+  /**
+   * Funciton used to transform all but Property enums values
+   * into int with size checking. Of course we can do static_cast
+   * instead of toNum, but for example this
+   * ```c++
+   *    auto color = static_cast<Color>(10000); // Color must be from 0 to 8...
+   *    auto colorNum = static_cast<int>(color); // Logic error, but no one knows...
+   * ```
+   * does NOT cause an error and leads to undefined behavour.
+   * While this
+   * ```c++
+   *    auto color = static_cast<Color>(10000); // Color must be from 0 to 8...
+   *    auto colorNum = toNum(color); // Error, program will terminate
+   * ```
+   * Will throw an assertion error and terminate program.
+   * Defending from ourselves.
+   */
   template< class Enum_Val_t >
   int toNum(Enum_Val_t value);
 
+  /**
+   * @overload
+   * Same as previous one, but works exactly with Property enum.
+   */
   int toNum(Property value);
 
+  // Just ignore that. Purely C plus plus shit
   namespace traits_
   {
     template
@@ -148,6 +189,8 @@ namespace bddHelper
   {
   public:
     template < class T > using vect = std::vector< T >;
+    /// See all these in \b main.cpp
+
     static constexpr int nObjs = 9;
     static constexpr int nProps = 4;
     static constexpr int nVals = 9;
@@ -155,13 +198,12 @@ namespace bddHelper
     static constexpr int nValuesVars = nObjs * nProps * nValueBits;
     static constexpr int nTotalVars = nValuesVars;
 
-    BDDHelper(vect< vect< vect< bdd > > > values);
+    // See BDDHelper.cpp file
+    BDDHelper(vect< vect< vect< bdd > > > structedVars);
 
+    // See below
     template< class V_t >
     bdd getObjectVal(Object obj, V_t value);
-
-    template< class V_t >
-    bdd calcObjectVal_(Object obj, V_t value);
 
     std::vector< bdd > getValueVars(Object obj, Property prop);
 
@@ -174,30 +216,33 @@ namespace bddHelper
     friend class ::VarsSetupFixture_BDDHelperbasic_Test;
     friend class ::VarsSetupFixture;
   #endif
-    vect< vect< vect< bdd > > > vars_;
+    vect< vect< vect< bdd > > > structVars_;
     vect< vect< vect< bdd > > > values_;
 
     BDDHelper();
   };
 
+  /**
+   * See values_ array description in constructor comments.
+   */
   template < class V_t >
   inline bdd BDDHelper::getObjectVal(Object obj, V_t value)
   {
     static_assert(traits_::IsValueType_v< V_t >, "Value must be one of properties type");
     auto objNum = toNum(obj);
+    /**
+     * PropertyFromValueEnum_v
+     * For example, this will convert
+     * - Color::RED to Property::Color.
+     * - Animal::Bird to Property::Animal.
+     * 
+     * It's way better than passing Property as additional parameter,
+     * because we can by mistake pass Property::Animal and Nation::4e4enec.
+     * This will lead to undefined behaviour, and no one can check this error...
+     */
     auto propNum = toNum(traits_::PropertyFromValueEnum_v< V_t >);
     auto valNum = toNum(value);
     return values_[objNum][propNum][valNum];
-  }
-
-  template < class V_t >
-  inline bdd BDDHelper::calcObjectVal_(Object obj, V_t value)
-  {
-    static_assert(traits_::IsValueType_v< V_t >, "Value must be one of properties type");
-    auto objNum = toNum(obj);
-    auto propNum = toNum(traits_::PropertyFromValueEnum_v< V_t >);
-    auto valNum = toNum(value);
-    return numToBin(valNum, vars_[objNum][propNum]);
   }
 
   template < class Enum_Val_t >
