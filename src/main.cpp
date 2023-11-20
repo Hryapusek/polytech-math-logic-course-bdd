@@ -190,6 +190,7 @@ int main()
   std::cout << "Objects are...\n";
   // Iterate over true combinations and extract one of them in varset variable.
   bdd_allsat(builder.result(), extractSet);
+  // Print one of suitable objects properties combinations
   printObjects();
   bdd_done();
   return 0;
