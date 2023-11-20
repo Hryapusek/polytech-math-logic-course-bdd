@@ -46,6 +46,11 @@ namespace bddHelper
     }
   }
 
+  /**
+   * Just return variables that describe Object's obj Property prop.
+   * For example getObjPropertyVars(Object::SECOND, Property::Color)
+   * will return structVars_[1][0]
+   */
   std::vector< bdd > BDDHelper::getObjPropertyVars(Object obj, Property prop)
   {
     auto objNum = toNum(obj);
@@ -53,6 +58,7 @@ namespace bddHelper
     return structVars_[objNum][propNum];
   }
 
+  // See BDDHelper::numToBinUnsafe - right the next
   bdd BDDHelper::numToBin(int num, vect< bdd > vars)
   {
     assert(vars.size() == 4);
@@ -60,6 +66,15 @@ namespace bddHelper
     return numToBinUnsafe(num, vars);
   }
 
+  /**
+   * Transform num to binary format using vars array.
+   * 
+   * For example numToBinUnsafe(1, {a, b, c, d})
+   * return !a & !b & !c & d because 1 is 0001
+   * 
+   * numToBinUnsafe(2, {a, b, c, d})
+   * return !a & !b & c & !d because 2 is 0010
+  */
   bdd BDDHelper::numToBinUnsafe(int num, vect< bdd > vars)
   {
     assert(vars.size() == 4);
@@ -78,6 +93,7 @@ namespace bddHelper
     return resFormula;
   }
 
+  // See BDDHelper.hpp
   int toNum(Property value)
   {
     auto val = static_cast< int >(value);
@@ -86,7 +102,7 @@ namespace bddHelper
   }
 }
 
-#ifdef GTEST_TESTING
+#ifdef GTEST_TESTING //ignore
 
 #include <gtest/gtest.h>
 #include <ranges>

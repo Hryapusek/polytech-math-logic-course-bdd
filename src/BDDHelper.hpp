@@ -205,21 +205,24 @@ namespace bddHelper
     template< class V_t >
     bdd getObjectVal(Object obj, V_t value);
 
+    // See BDDHelper.cpp file
     std::vector< bdd > getObjPropertyVars(Object obj, Property prop);
 
+    // See BDDHelper.cpp file
     bdd numToBin(int num, vect< bdd > vars);
 
+    // See BDDHelper.cpp file
     bdd numToBinUnsafe(int num, vect< bdd > vars);
 
   private:
-  #ifdef GTEST_TESTING
+  #ifdef GTEST_TESTING // ignore
     friend class ::VarsSetupFixture_BDDHelperbasic_Test;
     friend class ::VarsSetupFixture;
+    BDDHelper();
   #endif
+    // See constructor
     vect< vect< vect< bdd > > > structVars_;
     vect< vect< vect< bdd > > > values_;
-
-    BDDHelper();
   };
 
   /**
@@ -235,7 +238,7 @@ namespace bddHelper
      * For example, this will convert
      * - Color::RED to Property::Color.
      * - Animal::Bird to Property::Animal.
-     * 
+     *
      * It's way better than passing Property as additional parameter,
      * because we can by mistake pass Property::Animal and Nation::4e4enec.
      * This will lead to undefined behaviour, and no one can check this error...
