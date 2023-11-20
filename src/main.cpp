@@ -9,10 +9,10 @@
 #include "PrintHelper.hpp"
 
 /**
- * The key idea of is next. We have some objects that have some
+ * The key idea is next. We have some objects that have some
  * properties. We need to choose combinations of objects properties
  * according to the conditions.
- * Conditions, For example, red house is near white.
+ * Conditions, for example, red house is near white.
  * Or 4e4enec lives with dog.
  *
  * We will create function, that gets combination of objects properties
@@ -73,7 +73,7 @@ std::string varset;
    variables values combination.
    @note See pattern Visitor.
  */
-void fun(char *varset_, int size)
+void extractSet(char *varset_, int size)
 {
   std::call_once(once, [&]() {
     varset = std::string(varset_, size);
@@ -188,7 +188,8 @@ int main()
   std::cout << "Bdd formula created. Starting counting sets...\n";
   std::cout << "Count of true variables values combinations: " << bdd_satcount(builder.result()) << '\n';
   std::cout << "Objects are...\n";
-  bdd_allsat(builder.result(), fun);
+  // Iterate over true combinations and extract one of them in varset variable.
+  bdd_allsat(builder.result(), extractSet);
   printObjects();
   bdd_done();
   return 0;
