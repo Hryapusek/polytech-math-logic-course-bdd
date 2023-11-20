@@ -46,7 +46,7 @@ namespace bddHelper
     }
   }
 
-  std::vector< bdd > BDDHelper::getValueVars(Object obj, Property prop)
+  std::vector< bdd > BDDHelper::getObjPropertyVars(Object obj, Property prop)
   {
     auto objNum = toNum(obj);
     auto propNum = toNum(prop);

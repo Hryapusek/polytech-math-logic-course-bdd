@@ -246,7 +246,7 @@ namespace
         std::for_each(std::execution::par, obj2Range.begin(), obj2Range.end(),
           [&](auto objNum2) {
           auto obj2 = static_cast< Object >(objNum2);
-          builder.addConditionTh(notEqual(h.getValueVars(obj1, prop), h.getValueVars(obj2, prop)));
+          builder.addConditionTh(notEqual(h.getObjPropertyVars(obj1, prop), h.getObjPropertyVars(obj2, prop)));
         });
       });
     });
@@ -263,7 +263,7 @@ namespace
         auto prop = static_cast< Property >(propNum);
         for (auto valNum : std::views::iota(9, 16))
         {
-          resFormulaToAdd &= not h.numToBinUnsafe(valNum, h.getValueVars(obj, prop));
+          resFormulaToAdd &= not h.numToBinUnsafe(valNum, h.getObjPropertyVars(obj, prop));
         }
       }
     }

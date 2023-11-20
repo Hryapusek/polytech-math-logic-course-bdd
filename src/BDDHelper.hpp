@@ -205,7 +205,7 @@ namespace bddHelper
     template< class V_t >
     bdd getObjectVal(Object obj, V_t value);
 
-    std::vector< bdd > getValueVars(Object obj, Property prop);
+    std::vector< bdd > getObjPropertyVars(Object obj, Property prop);
 
     bdd numToBin(int num, vect< bdd > vars);
 
