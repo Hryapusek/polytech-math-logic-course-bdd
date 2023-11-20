@@ -4,7 +4,8 @@ You can set your own neighbours in Conditions.cpp file. Code contains descriptio
 and examples of all six condition types.
 
 main.cpp file contains short description of course work in other words. Everything
-goes with practical examples.
+goes with practical examples. If you don't understand something in task document,
+then you probably will better understand it from commentaries in the code.
 
 # Build
 First build libbuddy.a file and put it into lib directory. File that already 
