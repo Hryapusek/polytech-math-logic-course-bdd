@@ -182,6 +182,7 @@ int main()
   }
   // Let's explore what is BDDHelper
   bddHelper::BDDHelper h(structedVars);
+  // Simpliest class in the world. Just contains result formula.
   BDDFormulaBuilder builder;
   conditions::addConditions(h, builder);
   std::cout << "Bdd formula created. Starting counting sets...\n";

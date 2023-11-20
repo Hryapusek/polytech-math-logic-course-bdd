@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <ranges>
 
+// Ignore this whole file.
+// Used for gtest
+
 class VarsSetupFixture: public ::testing::Test
 {
 public:
