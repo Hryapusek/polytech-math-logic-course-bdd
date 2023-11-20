@@ -18,6 +18,8 @@
  * We will create function, that gets combination of objects properties
  * and return true if all the conditions are satisfied, and false if not.
  *
+ * > Just feel the idea. Don't try to understand river from single bucket with water...
+ * 
  * So we say, let's create nValuesVars, so that
  * var[0] var[1] var[2] var[3] will set first object's FIRST property value.
  * We can set var[0] var[1] var[2] var[3] as 0001 - first object's first property
@@ -141,9 +143,9 @@ int main()
   // Let's create bdd variables. They described in the up.
   bdd_setvarnum(BDDHelper::nTotalVars);
   // Array to save all these variables.
-  // v[0] will contain first var
-  // v[1] will contain second var
-  // v[2]...
+  // vars[0] will contain first var
+  // vars[1] will contain second var
+  // vars[2]...
   std::vector< bdd > vars(nTotalVars);
   { // Here we just put all these variables in array.
     int i = 0;
@@ -161,17 +163,17 @@ int main()
      vars[nProps*nVaueBits*1 + nValueBits + 3].
      But it's just \b fucking \b disgusting.
      I create that array v, so that we can access
-     second objects second property by v[1][1].
+     second objects second property by structedVars[1][1].
      Dont forget that arrays indexes start with \b 0, not \b 1.
      */
-  auto v = vect< vect< vect< bdd > > >(nObjs);
+  auto structedVars = vect< vect< vect< bdd > > >(nObjs);
   for (auto objNum : std::views::iota(0, nObjs))
   {
-    v[objNum] = vect< vect< bdd > >(nProps);
+    structedVars[objNum] = vect< vect< bdd > >(nProps);
     for (auto propNum : std::views::iota(0, nProps))
     {
       auto baseIndex = objNum * nProps * nValueBits + propNum * nValueBits;
-      v[objNum][propNum] = vect< bdd >{
+      structedVars[objNum][propNum] = vect< bdd >{
         bdd_ithvar(baseIndex + 0),
         bdd_ithvar(baseIndex + 1),
         bdd_ithvar(baseIndex + 2),
@@ -179,7 +181,7 @@ int main()
     }
   }
   // Let's explore what is BDDHelper
-  bddHelper::BDDHelper h(v);
+  bddHelper::BDDHelper h(structedVars);
   BDDFormulaBuilder builder;
   conditions::addConditions(h, builder);
   std::cout << "Bdd formula created. Starting counting sets...\n";
