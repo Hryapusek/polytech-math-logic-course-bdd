@@ -7,10 +7,22 @@
 class BDDFormulaBuilder
 {
 public:
+  /**
+   * Create empty formula.
+   * Later we will add conditions using addCondition.
+   */
   BDDFormulaBuilder();
+  /**
+   * Adds condition to formula.
+   */
   void addCondition(bdd formula);
+  /**
+   * Same as previous, but thread safe.
+   */
   void addConditionTh(bdd formula);
-  void setFormula(bdd formula);
+  /**
+   * Return result bdd conditions formula.
+   */
   bdd result();
 
 private:
