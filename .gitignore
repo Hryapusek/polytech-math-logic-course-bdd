@@ -2,3 +2,4 @@ build/
 tmp.txt
 CMakeCache.txt
 CMakeFiles
+tmp.py
