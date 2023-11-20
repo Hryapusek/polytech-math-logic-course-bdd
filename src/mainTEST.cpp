@@ -5,6 +5,8 @@
 #include "BDDFormulaBuilder.hpp"
 #include <gtest/gtest.h>
 
+// Ignore this whole file. Just for GTest
+
 using namespace bddHelper;
 
 int main()
