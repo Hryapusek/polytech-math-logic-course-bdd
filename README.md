@@ -19,9 +19,9 @@ Install [CMake](https://cmake.org/download/) after this.
 First install [Ninja](https://github.com/ninja-build/ninja/releases) and add it's executable to PATH variable.  
 Then go to project directory and execute in powershell the next script.
 ```powershell
-cmake -G Ninja
 mkdir build
 cd build
+cmake -G Ninja ..
 cmake -S ../ -B .
 cmake --build . --target bdd_main
 ```
