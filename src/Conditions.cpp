@@ -24,6 +24,10 @@ namespace // Dont read this...
   {
     static_assert(!std::is_same< T1, T2 >::value, "Types must be unique");
   };
+
+  template < class T1 >
+  struct unique_types< T1 >
+  { };
 }
 
 namespace std
