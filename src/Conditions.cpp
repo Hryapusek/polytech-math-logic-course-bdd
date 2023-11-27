@@ -70,12 +70,12 @@ namespace
    *   1
    *   2
    */
-  std::vector leftNeighbourXYOffset = { 0, -1 };
-  std::vector rightNeighbourXYOffset = { 1, 1 };
+  std::vector leftNeighbourXYOffset = { -1, 1 };
+  std::vector rightNeighbourXYOffset = { -1, 0 };
   // Use to enable disable any skleika
   // Read about this at 30 page.
   constexpr bool vertSkleika = false;
-  constexpr bool horSkleika = false;
+  constexpr bool horSkleika = true;
 
   // Don't touch it...
   constexpr bool useSkleika = vertSkleika || horSkleika;
@@ -436,30 +436,9 @@ namespace
    */
   void addFirstCondition(BDDHelper &h, BDDFormulaBuilder &builder)
   {
-    if (not useSkleika)
-    {
-      builder.addCondition(h.getObjectVal(Object::FIRST, Nation::UKRAINE));
-      builder.addCondition(h.getObjectVal(Object::SECOND, Nation::BELORUS));
-      builder.addCondition(h.getObjectVal(Object::THIRD, Nation::GRUZIN));
-      // builder.addCondition(h.getObjectVal(Object::FOURTH, Nation::HISPANE));
-      // builder.addCondition(h.getObjectVal(Object::FIFTH, Nation::CHINA));
-      // builder.addCondition(h.getObjectVal(Object::SIXTH, Nation::RUSSIAN));
-      // builder.addCondition(h.getObjectVal(Object::SEVENTH, Nation::CHE4ENCI));
-      // builder.addCondition(h.getObjectVal(Object::EIGTH, Nation::ARMENIAN));
-      // builder.addCondition(h.getObjectVal(Object::NINETH, Nation::KAZAH));
-    }
-    else
-    {
-      // builder.addCondition(h.getObjectVal(Object::FIRST, Nation::UKRAINE));
-      // builder.addCondition(h.getObjectVal(Object::SECOND, Nation::BELORUS));
-      // builder.addCondition(h.getObjectVal(Object::THIRD, Nation::GRUZIN));
-      builder.addCondition(h.getObjectVal(Object::FOURTH, Nation::HISPANE));
-      builder.addCondition(h.getObjectVal(Object::FIFTH, Nation::CHINA));
-      builder.addCondition(h.getObjectVal(Object::SIXTH, Nation::RUSSIAN));
-      // builder.addCondition(h.getObjectVal(Object::SEVENTH, Nation::CHE4ENCI));
-      // builder.addCondition(h.getObjectVal(Object::EIGTH, Nation::ARMENIAN));
-      // builder.addCondition(h.getObjectVal(Object::NINETH, Nation::KAZAH));
-    }
+    builder.addCondition(h.getObjectVal(Object::SECOND, Nation::HISPANE));
+    builder.addCondition(h.getObjectVal(Object::FIFTH, Nation::CHINA));
+    builder.addCondition(h.getObjectVal(Object::EIGTH, Nation::RUSSIAN));
   }
 
   /**
@@ -531,23 +510,20 @@ namespace
    * There MUST exist object that are Neighbours and
    * one have Nation::CHINA and
    * second have Nation::ARMENIAN.
-   * 
+   *
    * Actually it uses addLeftNeighbour and addLeftNeighbour
    */
   void addFourthCondition(BDDHelper &h, BDDFormulaBuilder &builder)
   {
-    if (not useSkleika)
-    {
-      addNeighbours(Nation::CHINA, Nation::ARMENIAN, h, builder);
-      addNeighbours(Nation::RUSSIAN, Nation::KAZAH, h, builder);
-      addNeighbours(Nation::HISPANE, Nation::CHE4ENCI, h, builder);
-    }
-    else
-    {
-      addNeighbours(Nation::GRUZIN, Nation::ARMENIAN, h, builder);
-      addNeighbours(Nation::UKRAINE, Nation::KAZAH, h, builder);
-      addNeighbours(Nation::BELORUS, Nation::CHE4ENCI, h, builder);
-    }
+    addNeighbours(Nation::UKRAINE, Nation::CHE4ENCI, h, builder);
+    addNeighbours(Nation::BELORUS, Nation::ARMENIAN, h, builder);
+    addNeighbours(Nation::GRUZIN, Nation::KAZAH, h, builder);
+    // builder.addCondition(h.getObjectVal(Object::FIRST, Nation::UKRAINE));
+    // builder.addCondition(h.getObjectVal(Object::SECOND, Nation::BELORUS));
+    // builder.addCondition(h.getObjectVal(Object::THIRD, Nation::GRUZIN));
+    // builder.addCondition(h.getObjectVal(Object::SEVENTH, Nation::CHE4ENCI));
+    // builder.addCondition(h.getObjectVal(Object::EIGTH, Nation::ARMENIAN));
+    // builder.addCondition(h.getObjectVal(Object::NINETH, Nation::KAZAH));
   }
 }
 
@@ -598,20 +574,22 @@ TEST(Neighbours, rightNeighbourCheckNoSkleika)
 
 TEST(Neighbours, leftNeighbourCheckSkleika)
 {
-  if (!vertSkleika || !horSkleika)
+  if (!(!vertSkleika && horSkleika))
     GTEST_SKIP();
   auto res = getLeftNeighbour(Object::FIRST);
   EXPECT_TRUE(res.has_value());
-  EXPECT_TRUE(*res == Object::SEVENTH);
+  EXPECT_EQ(*res, Object::SIXTH);
+
+  res = getLeftNeighbour(Object::SEVENTH);
+  EXPECT_TRUE(!res.has_value());
 }
 
 TEST(Neighbours, rightNeighbourCheckSkleika)
 {
-  if (!vertSkleika || !horSkleika)
+  if (!(!vertSkleika && horSkleika))
     GTEST_SKIP();
   auto res = getRightNeighbour(Object::NINETH);
-  EXPECT_TRUE(res.has_value());
-  EXPECT_EQ(*res, Object::FIRST);
+  EXPECT_EQ(*res, Object::EIGTH);
 }
 
 TEST_F(VarsSetupFixture, Conditions_LoopCondition)
@@ -688,6 +666,45 @@ TEST_F(VarsSetupFixture, Conditions_RightNeighborsCondition_without_skleika)
 
   expectedResult |= h.getObjectVal(Object::FOURTH, Color::RED) & h.getObjectVal(Object::EIGTH, Color::GREEN);
   expectedResult |= h.getObjectVal(Object::FIFTH, Color::RED) & h.getObjectVal(Object::NINETH, Color::GREEN);
+  EXPECT_EQ(build.result(), expectedResult);
+}
+
+TEST_F(VarsSetupFixture, Conditions_RightNeighborsCondition_skleika)
+{
+  if (!(horSkleika && !vertSkleika))
+    GTEST_SKIP();
+  using namespace bddHelper;
+  BDDFormulaBuilder build;
+  addRightNeighbour(Color::RED, Color::GREEN, h, build);
+  auto expectedResult = h.getObjectVal(Object::FIRST, Color::RED) & h.getObjectVal(Object::THIRD, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::FOURTH, Color::RED) & h.getObjectVal(Object::SIXTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::SEVENTH, Color::RED) & h.getObjectVal(Object::NINETH, Color::GREEN);
+
+  expectedResult |= h.getObjectVal(Object::SECOND, Color::RED) & h.getObjectVal(Object::FIRST, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::FIFTH, Color::RED) & h.getObjectVal(Object::FOURTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::EIGTH, Color::RED) & h.getObjectVal(Object::SEVENTH, Color::GREEN);
+
+  expectedResult |= h.getObjectVal(Object::THIRD, Color::RED) & h.getObjectVal(Object::SECOND, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::SIXTH, Color::RED) & h.getObjectVal(Object::FIFTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::NINETH, Color::RED) & h.getObjectVal(Object::EIGTH, Color::GREEN);
+  EXPECT_EQ(build.result(), expectedResult);
+}
+
+TEST_F(VarsSetupFixture, Conditions_LeftNeighborsCondition_skleika)
+{
+  if (!(horSkleika && !vertSkleika))
+    GTEST_SKIP();
+  using namespace bddHelper;
+  BDDFormulaBuilder build;
+  addLeftNeighbour(Color::RED, Color::GREEN, h, build);
+  auto expectedResult = h.getObjectVal(Object::FIRST, Color::RED) & h.getObjectVal(Object::SIXTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::FOURTH, Color::RED) & h.getObjectVal(Object::NINETH, Color::GREEN);
+
+  expectedResult |= h.getObjectVal(Object::SECOND, Color::RED) & h.getObjectVal(Object::FOURTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::FIFTH, Color::RED) & h.getObjectVal(Object::SEVENTH, Color::GREEN);
+
+  expectedResult |= h.getObjectVal(Object::THIRD, Color::RED) & h.getObjectVal(Object::FIFTH, Color::GREEN);
+  expectedResult |= h.getObjectVal(Object::SIXTH, Color::RED) & h.getObjectVal(Object::EIGTH, Color::GREEN);
   EXPECT_EQ(build.result(), expectedResult);
 }
 
